@@ -1,12 +1,15 @@
 const { Pool } = require('pg');
 
-// Use DATABASE_URL if available (Railway provides this)
+const dbUrl = process.env.DATABASE_URL;
+console.log('Database URL present:', !!dbUrl);
+console.log('Database URL starts with:', dbUrl ? dbUrl.substring(0, 30) + '...' : 'N/A');
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+    connectionString: dbUrl,
+    ssl: dbUrl ? { rejectUnauthorized: false } : false,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 30000,
 });
 
 pool.on('error', (err) => {
