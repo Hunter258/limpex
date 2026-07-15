@@ -6,7 +6,7 @@ const analyticsTracker = async (req, res, next) => {
     res.on('finish', async () => {
         try {
             const duration = Date.now() - start;
-            const containerId = process.env.HOSTNAME || 'local';
+            const containerId = process.env.HOSTNAME || process.env.RAILWAY_SERVICE_NAME || 'local';
             
             await pool.query(
                 `INSERT INTO analytics 
@@ -17,14 +17,15 @@ const analyticsTracker = async (req, res, next) => {
                     req.method,
                     res.statusCode,
                     duration,
-                    req.ip || req.connection.remoteAddress,
-                    req.get('user-agent'),
+                    req.ip || req.connection?.remoteAddress || 'unknown',
+                    req.get('user-agent') || 'unknown',
                     req.user?.id || null,
                     containerId
                 ]
             );
         } catch (error) {
-            console.error('Analytics tracking error:', error);
+            // Silently ignore analytics errors to not break the app
+            console.error('Analytics tracking skipped:', error.message);
         }
     });
     
