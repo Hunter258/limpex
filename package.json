@@ -2,11 +2,13 @@
   "name": "limpex",
   "version": "1.0.0",
   "description": "Limpex Customs Brokerage Website",
+  "private": true,
   "scripts": {
     "start": "cd backend && node server.js",
-    "install-all": "cd backend && npm install && cd ../frontend && npm install",
-    "dev": "cd backend && npm run dev",
-    "build": "cd frontend && npm run build"
+    "install-frontend": "cd frontend && npm install",
+    "install-backend": "cd backend && npm install",
+    "build-frontend": "cd frontend && npm run build",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install"
   },
   "engines": {
     "node": "18.x"
