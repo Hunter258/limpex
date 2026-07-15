@@ -1,0 +1,31 @@
+category_id,name,description,price,unit,stock_quantity,origin_country,is_organic,is_available
+4,Broccoli - Fresh,"Fresh broccoli from USA",120.00,kg,300,USA,false,true
+4,Broccoli - Organic,"Organic broccoli from Europe",180.00,kg,150,Europe,true,true
+4,Zucchini - Green,"Green zucchini from Italy",100.00,kg,250,Italy,false,true
+4,Zucchini - Yellow,"Yellow summer squash",110.00,kg,200,Italy,false,true
+4,Bell Pepper - Red,"Red bell peppers from Turkey",150.00,kg,300,Turkey,false,true
+4,Bell Pepper - Yellow,"Yellow bell peppers, sweet",140.00,kg,250,Turkey,false,true
+4,Bell Pepper - Green,"Green bell peppers",80.00,kg,400,Turkey,false,true
+4,Mushroom - Button,"White button mushrooms",120.00,kg,400,Netherlands,false,true
+4,Mushroom - Portobello,"Large portobello mushrooms",200.00,kg,150,Netherlands,false,true
+4,Mushroom - Shiitake,"Premium shiitake mushrooms",350.00,kg,80,China,false,true
+4,Mushroom - Oyster,"Oyster mushrooms from India",100.00,kg,200,India,true,true
+4,Celery - Fresh,"Fresh celery stalks",80.00,kg,300,USA,false,true
+4,Asparagus - Green,"Green asparagus from Peru",250.00,kg,100,Peru,false,true
+4,Asparagus - White,"White asparagus from Europe",400.00,kg,50,Europe,false,true
+4,Corn - Sweet Corn,"Fresh sweet corn cobs",40.00,kg,500,USA,false,true
+4,Corn - Baby Corn,"Tender baby corn",80.00,kg,300,Thailand,false,true
+4,Leek - Fresh,"Fresh leeks for soups",90.00,kg,200,Europe,false,true
+4,Fennel - Fresh,"Fresh fennel bulbs, anise flavor",100.00,kg,150,Italy,false,true
+4,Artichoke - Globe,"Fresh artichokes from Italy",300.00,kg,80,Italy,false,true
+4,Radicchio - Italian,"Italian radicchio, bitter",150.00,kg,100,Italy,false,true
+4,Endive - Belgian,"Belgian endive for salads",200.00,kg,80,Belgium,false,true
+4,Romaine - Hearts,"Romaine lettuce hearts",60.00,kg,300,USA,false,true
+4,Arugula - Fresh,"Fresh rocket leaves",120.00,kg,200,Italy,false,true
+4,Watercress - Fresh,"Fresh watercress bunches",90.00,kg,150,UK,false,true
+4,Beetroot - Golden,"Golden beets from Europe",100.00,kg,120,Europe,false,true
+4,Radish - Watermelon,"Watermelon radish, pink center",150.00,kg,80,USA,false,true
+4,Radish - French,"French breakfast radish",120.00,kg,100,France,false,true
+4,Turnip - White,"Fresh white turnips",40.00,kg,300,USA,false,true
+4,Parsnip - Fresh,"Sweet parsnips for roasting",80.00,kg,150,UK,false,true
+4,Rutabaga - Swedish,"Swedish turnip, sweet",50.00,kg,200,Sweden,false,true

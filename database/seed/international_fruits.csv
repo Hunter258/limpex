@@ -1,0 +1,31 @@
+category_id,name,description,price,unit,stock_quantity,origin_country,is_organic,is_available
+2,Avocado - Hass,"Creamy Hass avocado from Peru",350.00,kg,200,Peru,false,true
+2,Avocado - Shepard,"Smooth buttery avocado from Australia",400.00,kg,150,Australia,false,true
+2,Blueberries - Organic,"Fresh organic blueberries from USA",600.00,kg,100,USA,true,true
+2,Blueberries - Chilean,"Sweet blueberries from Chile",500.00,kg,120,Chile,false,true
+2,Raspberry - Fresh,"Premium raspberries from Mexico",800.00,kg,80,Mexico,false,true
+2,Blackberry - UK,"Fresh blackberries from United Kingdom",750.00,kg,60,United Kingdom,false,true
+2,Kiwi - Green,"Zespri green kiwi from New Zealand",250.00,kg,300,New Zealand,false,true
+2,Kiwi - Gold,"Sweet gold kiwi from New Zealand",350.00,kg,200,New Zealand,false,true
+2,Dragon Fruit - Red,"Vietnamese red dragon fruit",280.00,kg,150,Vietnam,false,true
+2,Dragon Fruit - White,"White flesh dragon fruit from Vietnam",250.00,kg,180,Vietnam,false,true
+2,Cherry - USA,"Sweet cherries from Washington state",900.00,kg,80,USA,false,true
+2,Cherry - Turkish,"Dark cherries from Turkey",600.00,kg,100,Turkey,false,true
+2,Plum - Black,"Black plums from USA",300.00,kg,200,USA,false,true
+2,Plum - Red,"Red plums from Chile",280.00,kg,180,Chile,false,true
+2,Peach - Yellow,"Juicy peaches from China",250.00,kg,250,China,false,true
+2,Peach - White,"White peaches from Japan",400.00,kg,100,Japan,false,true
+2,Nectarine - Fresh,"Smooth nectarines from Italy",300.00,kg,150,Italy,false,true
+2,Fig - Turkish,"Sweet Turkish figs, dried",500.00,kg,120,Turkey,false,true
+2,Fig - Egyptian,"Fresh figs from Egypt",450.00,kg,100,Egypt,false,true
+2,Papaya - Hawaiian,"Solo papaya from Hawaii",200.00,kg,100,USA,false,true
+2,Mango - Thai,"Thai Nam Dok Mai mango, sweet",300.00,kg,150,Thailand,false,true
+2,Mango - Philippine,"Philippine Carabao mango",280.00,kg,120,Philippines,false,true
+2,Lychee - Fresh,"Fresh lychees from Thailand",400.00,kg,100,Thailand,false,true
+2,Longan - Fresh,"Thai longan, sweet and juicy",350.00,kg,80,Thailand,false,true
+2,Passion Fruit - Purple,"Purple passion fruit from Colombia",250.00,kg,120,Colombia,false,true
+2,Passion Fruit - Yellow,"Yellow passion fruit from Ecuador",220.00,kg,100,Ecuador,false,true
+2,Grapefruit - Pink,"Ruby red grapefruit from USA",150.00,kg,200,USA,false,true
+2,Pomelo - Thai,"Large Thai pomelo, sweet",200.00,kg,150,Thailand,false,true
+2,Persian Lemon,"Large lemons from Iran",120.00,kg,250,Iran,false,true
+2,Lime - Key,"Key limes from Mexico",100.00,kg,300,Mexico,false,true

@@ -1,0 +1,31 @@
+category_id,name,description,price,unit,stock_quantity,origin_country,is_organic,is_available
+6,Almonds - Marcona,"Spanish Marcona almonds, buttery",1500.00,kg,80,Spain,false,true
+6,Almonds - Sicilian,"Sicilian almonds, sweet",1200.00,kg,60,Italy,true,true
+6,Cashews - African,"African cashews, premium",700.00,kg,120,Vietnam,false,true
+6,Cashews - Vietnamese,"Vietnamese cashews, large",800.00,kg,100,Vietnam,false,true
+6,Pistachios - Sicilian,"Sicilian pistachios, Bronte",1800.00,kg,50,Italy,true,true
+6,Pistachios - Turkish,"Antep pistachios, premium",1100.00,kg,80,Turkey,true,true
+6,Pistachios - Australian,"Australian pistachios, fresh",1000.00,kg,60,Australia,true,true
+6,Walnuts - French,"French walnuts, Perigord",800.00,kg,80,France,true,true
+6,Walnuts - Chilean,"Chilean walnuts, fresh",650.00,kg,100,Chile,false,true
+6,Walnuts - English,"English walnuts, large",700.00,kg,90,USA,false,true
+6,Macadamia - Australian,"Premium Australian macadamias",2000.00,kg,50,Australia,true,true
+6,Macadamia - Hawaiian,"Hawaiian macadamia nuts",1800.00,kg,40,USA,false,true
+6,Pecans - American,"American pecans, premium",1200.00,kg,70,USA,false,true
+6,Pecans - Mexican,"Mexican pecans, fresh",900.00,kg,80,Mexico,true,true
+6,Brazil Nuts - Organic,"Organic Brazil nuts, large",1000.00,kg,60,Bolivia,true,true
+6,Brazil Nuts - Raw,"Raw Brazil nuts, selenium rich",800.00,kg,80,Brazil,true,true
+6,Pine Nuts - Chinese,"Chinese pine nuts, kernels",1500.00,kg,40,China,false,true
+6,Pine Nuts - Mediterranean,"Mediterranean pine nuts, premium",2500.00,kg,30,Italy,true,true
+6,Hazelnuts - Turkish,"Turkish hazelnuts, premium",900.00,kg,100,Turkey,true,true
+6,Hazelnuts - Piedmont,"Italian Piedmont hazelnuts",1200.00,kg,60,Italy,true,true
+6,Cashews - Mozambican,"Mozambique cashews, large",750.00,kg,80,Mozambique,false,true
+6,Almonds - Australian,"Australian almonds, fresh",900.00,kg,70,Australia,true,true
+6,Pistachios - Californian,"California pistachios, roasted",1000.00,kg,90,USA,false,true
+6,Walnuts - Black,"Black walnuts, intense flavor",1000.00,kg,50,USA,false,true
+6,Pecans - In-Shell,"In-shell pecans, fresh",700.00,kg,100,USA,false,true
+6,Macadamia - Raw,"Raw macadamia kernels",1600.00,kg,40,Australia,true,true
+6,Hazelnuts - Raw,"Raw hazelnuts, fresh",700.00,kg,120,Turkey,true,true
+6,Brazil Nuts - Roasted,"Lightly roasted Brazil nuts",900.00,kg,60,Brazil,false,true
+6,Pine Nuts - Korean,"Korean pine nuts, premium",2000.00,kg,30,South Korea,false,true
+6,Almonds - Jordanian,"Jordanian almonds, sweet",1100.00,kg,50,Jordan,true,true

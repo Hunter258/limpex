@@ -1,0 +1,31 @@
+category_id,name,description,price,unit,stock_quantity,origin_country,is_organic,is_available
+5,Almonds - California,"Premium California almonds, imported",800.00,kg,200,USA,true,true
+5,Almonds - Mamra,"Kashmiri Mamra almonds, premium quality",1200.00,kg,100,India,true,true
+5,Almonds - Gurbandi,"Small Gurbandi almonds, sweet",700.00,kg,150,Afghanistan,true,true
+5,Cashews - W180,"Large cashew nuts, premium grade",900.00,kg,150,India,true,true
+5,Cashews - W210,"Medium cashew nuts",750.00,kg,200,India,true,true
+5,Cashews - W240,"Regular cashew nuts",650.00,kg,250,India,true,true
+5,Cashews - W320,"Small cashew pieces",500.00,kg,300,India,true,true
+5,Raisins - Kashmiri,"Kashmiri golden raisins, sweet",400.00,kg,200,India,true,true
+5,Raisins - Thompson,"Thompson seedless raisins",300.00,kg,300,India,true,true
+5,Raisins - Black,"Black raisins from Afghanistan",350.00,kg,200,Afghanistan,true,true
+5,Raisins - Brown,"Turkish brown raisins",320.00,kg,250,Turkey,false,true
+5,Dates - Medjool,"Premium Medjool dates, large",600.00,kg,150,Iran,true,true
+5,Dates - Ajwa,"Saudi Ajwa dates, premium",800.00,kg,100,Saudi Arabia,true,true
+5,Dates - Kimia,"Iranian Kimia dates, sweet",400.00,kg,200,Iran,true,true
+5,Dates - Piarom,"Iranian Piarom dates, semi-dry",500.00,kg,120,Iran,true,true
+5,Figs - Turkish,"Turkish figs, sun-dried",500.00,kg,150,Turkey,true,true
+5,Figs - Indian,"Indian figs, premium quality",400.00,kg,120,India,true,true
+5,Pistachios - Iranian,"Premium Iranian pistachios",900.00,kg,100,Iran,true,true
+5,Pistachios - Roasted,"Roasted and salted pistachios",850.00,kg,150,Iran,false,true
+5,Pistachios - Anti,"Anti pistachios, large",1000.00,kg,80,Iran,true,true
+5,Walnuts - Kashmiri,"Kashmiri walnuts, premium",700.00,kg,120,India,true,true
+5,Walnuts - Californian,"California walnuts, large",600.00,kg,150,USA,false,true
+5,Peanuts - Roasted,"Roasted peanuts, salted",100.00,kg,500,India,false,true
+5,Peanuts - Raw,"Raw peanuts for cooking",80.00,kg,600,India,true,true
+5,Coconut - Desiccated,"Desiccated coconut powder",120.00,kg,400,India,true,true
+5,Coconut - Copra,"Dried coconut slices",100.00,kg,300,India,true,true
+5,Poppy Seeds - White,"White poppy seeds, khus khus",200.00,kg,200,India,true,true
+5,Sesame Seeds - White,"White sesame seeds",150.00,kg,300,India,true,true
+5,Sesame Seeds - Black,"Black sesame seeds",180.00,kg,250,India,true,true
+5,Flax Seeds - Organic,"Organic flax seeds, omega-3 rich",200.00,kg,200,India,true,true

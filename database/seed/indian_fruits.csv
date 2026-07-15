@@ -1,0 +1,31 @@
+category_id,name,description,price,unit,stock_quantity,origin_country,is_organic,is_available
+1,Alphonso Mango,"Premium Hapus mango from Ratnagiri, sweet and aromatic",180.00,kg,500,India,true,true
+1,Kesar Mango,"Gujarat's famous mango, bright yellow flesh",120.00,kg,400,India,true,true
+1,Dasheri Mango,"Lucknow's heritage mango, fiberless and sweet",100.00,kg,350,India,true,true
+1,Langra Mango,"Green-skinned mango from Varanasi, rich flavor",90.00,kg,300,India,true,true
+1,Chausa Mango,"Juicy summer mango, golden flesh",85.00,kg,250,India,true,true
+1,Banana - Robusta,"Premium Cavendish bananas, sweet and creamy",40.00,kg,800,India,true,true
+1,Banana - Red,"Red bananas from Kerala, creamy texture",60.00,kg,300,India,true,true
+1,Banana - Nendran,"Kerala's famous cooking banana",50.00,kg,400,India,true,true
+1,Apple - Shimla,"Himachal apples, crisp and tangy",80.00,kg,600,India,true,true
+1,Apple - Kashmiri,"Kashmir royal apples, deep red color",120.00,kg,400,India,true,true
+1,Grapes - Thompson,"Seedless green grapes from Maharashtra",70.00,kg,500,India,true,true
+1,Grapes - Red Globe,"Large red grapes, juicy and sweet",90.00,kg,350,India,true,true
+1,Guava - Allahabad Safeda,"Famous pink guava, aromatic and sweet",40.00,kg,600,India,true,true
+1,Guava - L49,"Lucknow variety, soft flesh",35.00,kg,500,India,true,true
+1,Papaya - Red Lady,"Taiwan variety grown in India, sweet",30.00,kg,700,India,true,true
+1,Papaya - Pusa Delicious,"Indian variety, bright orange flesh",25.00,kg,600,India,true,true
+1,Watermelon - Sugar Baby,"Small seedless variety, extra sweet",20.00,kg,800,India,true,true
+1,Watermelon - All Sweet,"Large red flesh watermelon",18.00,kg,700,India,true,true
+1,Pineapple - Kewai,"Queen variety from Meghalaya, very sweet",40.00,kg,400,India,true,true
+1,Pineapple - Golden,"Smooth Cayenne variety, tangy",35.00,kg,350,India,true,true
+1,Orange - Nagpur,"Nagpur's famous mandarin orange",60.00,kg,500,India,true,true
+1,Orange - Kinnow,"Punjab's premium kinnow, juicy",55.00,kg,600,India,true,true
+1,Sapota - Kalipatti,"Gujarat's premium chiku, sweet and grainy",50.00,kg,300,India,true,true
+1,Jackfruit - India,"Large jackfruit from Kerala",40.00,kg,200,India,true,true
+1,Custard Apple - Balanagar,"Andhra variety, creamy and sweet",80.00,kg,150,India,true,true
+1,Gooseberry - Amla,"Fresh Indian gooseberry, vitamin C rich",60.00,kg,400,India,true,true
+1,Pomegranate - Bhagwa,"Nasik's premium pomegranate, ruby red",120.00,kg,350,India,true,true
+1,Pomegranate - Ganesh,"Common variety, good sweetness",80.00,kg,400,India,true,true
+1,Star Fruit - Kamrakh,"Fresh star fruit from Kerala",70.00,kg,150,India,true,true
+1,Wood Apple - Bael,"Sacred fruit, medicinal properties",40.00,kg,100,India,true,true

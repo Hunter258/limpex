@@ -1,0 +1,31 @@
+category_id,name,description,price,unit,stock_quantity,origin_country,is_organic,is_available
+3,Potato - Regular,"Common potatoes for daily use",25.00,kg,2000,India,true,true
+3,Potato - Sweet,"Sweet potatoes from Maharashtra",40.00,kg,800,India,true,true
+3,Potato - Baby,"Small baby potatoes, premium",60.00,kg,400,India,true,true
+3,Onion - Red,"Nashik red onions, pungent",30.00,kg,1500,India,true,true
+3,Onion - White,"White onions, mild flavor",35.00,kg,800,India,true,true
+3,Onion - Pearl,"Small pearl onions for pickling",80.00,kg,200,India,true,true
+3,Tomato - Regular,"Common tomatoes for cooking",25.00,kg,2000,India,true,true
+3,Tomato - Cherry,"Sweet cherry tomatoes",80.00,kg,400,India,true,true
+3,Tomato - Roma,"Plum tomatoes for sauces",40.00,kg,600,India,true,true
+3,Spinach - Palak,"Fresh spinach leaves, iron rich",30.00,kg,500,India,true,true
+3,Spinach - Baby,"Tender baby spinach leaves",60.00,kg,200,India,true,true
+3,Fenugreek - Methi,"Fresh fenugreek leaves",25.00,kg,400,India,true,true
+3,Moringa - Drumstick,"Fresh drumsticks from South India",40.00,kg,300,India,true,true
+3,Bitter Gourd - Karela,"Fresh bitter gourd, medicinal",50.00,kg,400,India,true,true
+3,Bottle Gourd - Lauki,"Fresh bottle gourd, light",20.00,kg,600,India,true,true
+3,Ridge Gourd - Torai,"Ridge gourd for curries",30.00,kg,500,India,true,true
+3,Bitter Gourd - Small,"Small bitter gourd, extra bitter",60.00,kg,200,India,true,true
+3,Okra - Bhindi,"Fresh okra, tender",40.00,kg,800,India,true,true
+3,Okra - Baby,"Small baby okra, premium",70.00,kg,300,India,true,true
+3,Eggplant - Brinjal,"Large eggplant for curries",30.00,kg,700,India,true,true
+3,Eggplant - Baby,"Small baby eggplant",50.00,kg,400,India,true,true
+3,Eggplant - Purple,"Long purple eggplant",35.00,kg,500,India,true,true
+3,Cauliflower - Regular,"Fresh cauliflower heads",40.00,kg,600,India,true,true
+3,Cauliflower - Purple,"Purple cauliflower, antioxidant rich",80.00,kg,150,India,true,true
+3,Cabbage - Green,"Fresh green cabbage",20.00,kg,800,India,true,true
+3,Cabbage - Red,"Red cabbage for salads",35.00,kg,300,India,true,true
+3,Carrot - Orange,"Fresh orange carrots",30.00,kg,700,India,true,true
+3,Carrot - Red,"Delhi red carrots, sweet",40.00,kg,500,India,true,true
+3,Beetroot - Fresh,"Fresh beetroot, iron rich",35.00,kg,600,India,true,true
+3,Radish - White,"White radish mooli",20.00,kg,500,India,true,true
