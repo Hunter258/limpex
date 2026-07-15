@@ -51,7 +51,7 @@ const Products = () => {
 
     const filteredProducts = products.filter((product) => {
         if (filters.category && product.category_type !== filters.category) return false;
-        if (filters.type && product.origin_country?.toLowerCase() !== filters.type) return false;
+        if (filters.type && product.parent_category?.toLowerCase() !== filters.type) return false;
         if (filters.search && !product.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
         if (filters.organic && !product.is_organic) return false;
         return true;
@@ -87,7 +87,7 @@ const Products = () => {
         const data = filteredProducts.map((p) => ({
             Name: p.name,
             Category: p.category_type,
-            Type: p.origin_country,
+            Type: p.parent_category,
             Price: p.price,
             Unit: p.unit,
             Stock: p.stock_quantity,
@@ -403,6 +403,7 @@ const Products = () => {
                         <option value="">All Types</option>
                         <option value="indian">Indian</option>
                         <option value="international">International</option>
+                        <option value="exotic">Exotic</option>
                     </select>
 
                     <input
@@ -452,7 +453,7 @@ const Products = () => {
                     {paginatedProducts.map((product) => {
                         const stock = getStockBadge(product.stock_quantity);
                         const categoryBadge = getCategoryBadge(product.category_type);
-                        const imageUrl = getProductImage(product.name, product.category_type);
+                        const imageUrl = product.image_url || getProductImage(product.name, product.category_type);
 
                         return (
                             <div
