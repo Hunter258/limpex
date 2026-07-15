@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
+    const { language, changeLanguage, t } = useLanguage();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,37 +49,59 @@ const Register = () => {
 
     return (
         <div className="auth-container">
+            <div className="language-switcher-top">
+                <button 
+                    className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+                    onClick={() => changeLanguage('en')}
+                >
+                    English
+                </button>
+                <button 
+                    className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
+                    onClick={() => changeLanguage('hi')}
+                >
+                    हिन्दी
+                </button>
+                <button 
+                    className={`lang-btn ${language === 'mr' ? 'active' : ''}`}
+                    onClick={() => changeLanguage('mr')}
+                >
+                    मराठी
+                </button>
+            </div>
+            
             <div className="auth-card">
-                <h1>Limpex</h1>
-                <p className="subtitle">Create your account</p>
+                <div className="auth-logo">Limpex</div>
+                <h1>{t('authRegister')}</h1>
+                <p className="subtitle">{t('authSubtitle')}</p>
                 
                 {error && <div className="error-message">{error}</div>}
                 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>First Name</label>
+                        <label>{t('authFirstName')}</label>
                         <input
                             type="text"
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
-                            placeholder="Enter first name"
+                            placeholder={t('authFirstName')}
                         />
                     </div>
                     
                     <div className="form-group">
-                        <label>Last Name</label>
+                        <label>{t('authLastName')}</label>
                         <input
                             type="text"
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
-                            placeholder="Enter last name"
+                            placeholder={t('authLastName')}
                         />
                     </div>
                     
                     <div className="form-group">
-                        <label>Email Address</label>
+                        <label>{t('authEmail')}</label>
                         <input
                             type="email"
                             name="email"
@@ -89,39 +113,39 @@ const Register = () => {
                     </div>
                     
                     <div className="form-group">
-                        <label>Password</label>
+                        <label>{t('authPassword')}</label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            placeholder="Min. 8 characters"
+                            placeholder="••••••••"
                         />
                     </div>
                     
                     <div className="form-group">
-                        <label>Confirm Password</label>
+                        <label>{t('authConfirmPassword')}</label>
                         <input
                             type="password"
                             name="confirmPassword"
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             required
-                            placeholder="Confirm your password"
+                            placeholder="••••••••"
                         />
                     </div>
                     
                     <button type="submit" className="btn btn-primary-full" disabled={loading}>
-                        {loading ? 'Creating account...' : 'Create Account'}
+                        {loading ? '...' : t('authRegisterButton')}
                     </button>
                 </form>
                 
                 <p className="auth-link">
-                    Already have an account? <Link to="/login">Sign in</Link>
+                    {t('authHasAccount')} <Link to="/login">{t('authLoginHere')}</Link>
                 </p>
                 <p className="auth-link" style={{ marginTop: '0.5rem' }}>
-                    <Link to="/">← Back to Home</Link>
+                    <Link to="/">{t('authBackHome')}</Link>
                 </p>
             </div>
         </div>

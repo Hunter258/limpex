@@ -13,6 +13,7 @@ import {
     Filler
 } from 'chart.js';
 import api from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 ChartJS.register(
     CategoryScale,
@@ -30,6 +31,7 @@ const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState('7d');
+    const { t } = useLanguage();
 
     useEffect(() => {
         fetchDashboard();
@@ -46,7 +48,7 @@ const Dashboard = () => {
         }
     };
 
-    if (loading) return <div className="loading">Loading dashboard...</div>;
+    if (loading) return <div className="loading">Loading...</div>;
 
     const requestData = {
         labels: stats?.userActivity?.map(d => new Date(d.day).toLocaleDateString()) || [],
@@ -54,8 +56,8 @@ const Dashboard = () => {
             {
                 label: 'Requests',
                 data: stats?.userActivity?.map(d => d.requests) || [],
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderColor: '#00b4a0',
+                backgroundColor: 'rgba(0, 180, 160, 0.1)',
                 fill: true,
                 tension: 0.4
             }
@@ -81,7 +83,7 @@ const Dashboard = () => {
         datasets: [
             {
                 data: stats?.sourceStats?.map(s => s.count) || [],
-                backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                backgroundColor: ['#00b4a0', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
             }
         ]
     };
@@ -89,7 +91,7 @@ const Dashboard = () => {
     return (
         <div>
             <div className="page-header">
-                <h1>Dashboard</h1>
+                <h1>{t('dashTitle')}</h1>
                 <div className="filter-group">
                     <select value={period} onChange={(e) => setPeriod(e.target.value)}>
                         <option value="24h">Last 24 Hours</option>
@@ -101,15 +103,15 @@ const Dashboard = () => {
 
             <div className="stats-grid">
                 <div className="stat-card">
-                    <h3>Total Requests</h3>
+                    <h3>{t('dashTotalRequests')}</h3>
                     <div className="value">{stats?.stats?.total_requests || 0}</div>
                 </div>
                 <div className="stat-card">
-                    <h3>Unique Users</h3>
+                    <h3>{t('dashActiveUsers')}</h3>
                     <div className="value">{stats?.stats?.unique_users || 0}</div>
                 </div>
                 <div className="stat-card">
-                    <h3>Avg Response Time</h3>
+                    <h3>Avg Response</h3>
                     <div className="value">{stats?.stats?.avg_response_time || 0}ms</div>
                 </div>
                 <div className="stat-card">
@@ -136,7 +138,7 @@ const Dashboard = () => {
             </div>
 
             <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h3>User Activity</h3>
+                <h3>{t('dashRecentActivity')}</h3>
                 <div className="chart-container">
                     <Line data={userActivityData} options={{ responsive: true, maintainAspectRatio: false }} />
                 </div>
