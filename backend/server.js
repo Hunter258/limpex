@@ -63,9 +63,6 @@ const initDatabase = async () => {
         }
 
         try {
-            await pool.query('DROP TABLE IF EXISTS order_items CASCADE');
-            await pool.query('DROP TABLE IF EXISTS delivery_tracking CASCADE');
-            await pool.query('DROP TABLE IF EXISTS orders CASCADE');
             await pool.query('DROP TABLE IF EXISTS products CASCADE');
             await pool.query('DROP TABLE IF EXISTS categories CASCADE');
 
@@ -87,26 +84,30 @@ const initDatabase = async () => {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`);
 
-            await pool.query('CREATE INDEX idx_products_category ON products(category_id)');
-            await pool.query('CREATE INDEX idx_products_available ON products(is_available)');
+            await pool.query('CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id)');
+            await pool.query('CREATE INDEX IF NOT EXISTS idx_products_available ON products(is_available)');
 
-            await pool.query(`CREATE TABLE orders (
+            await pool.query(`CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL PRIMARY KEY, user_id UUID REFERENCES users(id),
                 customer_name VARCHAR(255) NOT NULL, customer_email VARCHAR(255),
                 customer_phone VARCHAR(20), delivery_address TEXT NOT NULL,
                 total_amount DECIMAL(10,2) NOT NULL, status VARCHAR(50) DEFAULT 'pending',
                 payment_method VARCHAR(50) DEFAULT 'cod', payment_id VARCHAR(255),
-                notes TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                delivery_estimate VARCHAR(100), notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )`);
 
-            await pool.query(`CREATE TABLE order_items (
+            await pool.query(`CREATE TABLE IF NOT EXISTS order_items (
                 id SERIAL PRIMARY KEY, order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
                 product_id INTEGER REFERENCES products(id), product_name VARCHAR(255) NOT NULL,
                 quantity INTEGER NOT NULL, price DECIMAL(10,2) NOT NULL, unit VARCHAR(20) DEFAULT 'kg'
             )`);
 
-            await pool.query(`CREATE TABLE delivery_tracking (
+            await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_estimate VARCHAR(100)`);
+            await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(255)`);
+
+            await pool.query(`CREATE TABLE IF NOT EXISTS delivery_tracking (
                 id SERIAL PRIMARY KEY, order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
                 status VARCHAR(50) NOT NULL, location VARCHAR(255), notes TEXT,
                 estimated_delivery TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -498,7 +499,7 @@ app.get('/api/users', async (req, res) => {
 // Create order (public)
 app.post('/api/orders', async (req, res) => {
     try {
-        const { customerName, customerEmail, customerPhone, deliveryAddress, items, notes, paymentMethod } = req.body;
+        const { customerName, customerEmail, customerPhone, deliveryAddress, items, notes, paymentMethod, payment_id } = req.body;
         
         if (!customerName || !deliveryAddress || !items || items.length === 0) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -506,10 +507,13 @@ app.post('/api/orders', async (req, res) => {
         
         const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
+        const estimatedDelivery = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+        const deliveryEstimate = estimatedDelivery.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+        
         const orderResult = await pool.query(
-            `INSERT INTO orders (customer_name, customer_email, customer_phone, delivery_address, total_amount, notes, payment_method)
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [customerName, customerEmail || null, customerPhone || null, deliveryAddress, totalAmount, notes || null, paymentMethod || 'cod']
+            `INSERT INTO orders (customer_name, customer_email, customer_phone, delivery_address, total_amount, notes, payment_method, payment_id, delivery_estimate)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+            [customerName, customerEmail || null, customerPhone || null, deliveryAddress, totalAmount, notes || null, paymentMethod || 'cod', payment_id || null, deliveryEstimate]
         );
         
         const order = orderResult.rows[0];
@@ -523,7 +527,6 @@ app.post('/api/orders', async (req, res) => {
         }
         
         // Create initial tracking
-        const estimatedDelivery = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 days
         await pool.query(
             `INSERT INTO delivery_tracking (order_id, status, notes, estimated_delivery)
              VALUES ($1, 'confirmed', 'Order placed successfully', $2)`,

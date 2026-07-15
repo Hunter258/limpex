@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
@@ -46,6 +46,23 @@ const LandingPage = () => {
         fetchProducts();
     }, []);
 
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('scroll-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+        );
+        const elements = document.querySelectorAll('.scroll-reveal');
+        elements.forEach((el) => observer.observe(el));
+        return () => observer.disconnect();
+    }, [loadingProducts]);
+
     const categoryImages = {
         indian: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
         international: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=400',
@@ -57,7 +74,7 @@ const LandingPage = () => {
 
     const filteredProducts = activeCategory === 'all'
         ? products.slice(0, 12)
-        : products.filter(p => p.category === activeCategory).slice(0, 12);
+        : products.filter(p => p.category_name === activeCategory || p.category_type === activeCategory || p.parent_category === activeCategory).slice(0, 12);
 
     const testimonials = [
         { id: 1, name: 'Rajesh Kumar', company: 'Kumar Exports Pvt Ltd', text: 'Limpex has been our trusted partner for customs clearance for over 5 years. Their efficiency and professionalism are unmatched.', rating: 5 },
@@ -125,6 +142,12 @@ const LandingPage = () => {
                 }
                 
                 .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+                
+                .scroll-reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+                .scroll-reveal.scroll-visible { opacity: 1; transform: translateY(0); }
+                .scroll-reveal:nth-child(2) { transition-delay: 0.1s; }
+                .scroll-reveal:nth-child(3) { transition-delay: 0.2s; }
+                .scroll-reveal:nth-child(4) { transition-delay: 0.3s; }
                 
                 .product-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
                 .product-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 25px 50px rgba(0,180,160,0.2); }
@@ -602,13 +625,13 @@ const LandingPage = () => {
                         gap: '20px'
                     }}>
                         {[
-                            { name: 'Indian Fruits', filter: 'indian', sub: 'Fresh & Seasonal', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=350', color: '#ff6b6b', count: products.filter(p => p.category === 'indian' && p.type === 'fruits').length || '10+' },
-                            { name: 'International Fruits', filter: 'international', sub: 'Imported Goodness', img: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=350', color: '#4ecdc4', count: products.filter(p => p.category === 'international' && p.type === 'fruits').length || '10+' },
-                            { name: 'Exotic Fruits', filter: 'exotic', sub: 'Premium Collection', img: 'https://images.unsplash.com/photo-1527325687032-427c14f7d1c0?w=350', color: '#9b59b6', count: products.filter(p => p.category === 'exotic' && p.type === 'fruits').length || '8+' },
-                            { name: 'Indian Vegetables', filter: 'indian', sub: 'Garden Fresh', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=350', color: '#2ecc71', count: products.filter(p => p.category === 'indian' && p.type === 'vegetables').length || '10+' },
-                            { name: 'International Vegetables', filter: 'international', sub: 'Global Selection', img: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=350', color: '#3498db', count: products.filter(p => p.category === 'international' && p.type === 'vegetables').length || '8+' },
-                            { name: 'Exotic Vegetables', filter: 'exotic', sub: 'Specialty Items', img: 'https://images.unsplash.com/photo-1515471209610-dae159334820?w=350', color: '#e74c3c', count: products.filter(p => p.category === 'exotic' && p.type === 'vegetables').length || '8+' },
-                            { name: 'Indian Dry Fruits', filter: 'dry_fruits', sub: 'Premium Quality', img: 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=350', color: '#f39c12', count: products.filter(p => p.category === 'dry_fruits').length || '10+' },
+                            { name: 'Indian Fruits', filter: 'Indian Fruits', sub: 'Fresh & Seasonal', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=350', color: '#ff6b6b', count: products.filter(p => p.category_name === 'Indian Fruits').length || '10+' },
+                            { name: 'International Fruits', filter: 'International Fruits', sub: 'Imported Goodness', img: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=350', color: '#4ecdc4', count: products.filter(p => p.category_name === 'International Fruits').length || '10+' },
+                            { name: 'Exotic Fruits', filter: 'Exotic Fruits', sub: 'Premium Collection', img: 'https://images.unsplash.com/photo-1527325687032-427c14f7d1c0?w=350', color: '#9b59b6', count: products.filter(p => p.category_name === 'Exotic Fruits').length || '8+' },
+                            { name: 'Indian Vegetables', filter: 'Indian Vegetables', sub: 'Garden Fresh', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=350', color: '#2ecc71', count: products.filter(p => p.category_name === 'Indian Vegetables').length || '10+' },
+                            { name: 'International Vegetables', filter: 'International Vegetables', sub: 'Global Selection', img: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=350', color: '#3498db', count: products.filter(p => p.category_name === 'International Vegetables').length || '8+' },
+                            { name: 'Exotic Vegetables', filter: 'Exotic Vegetables', sub: 'Specialty Items', img: 'https://images.unsplash.com/photo-1515471209610-dae159334820?w=350', color: '#e74c3c', count: products.filter(p => p.category_name === 'Exotic Vegetables').length || '8+' },
+                            { name: 'Indian Dry Fruits', filter: 'Indian Dry Fruits', sub: 'Premium Quality', img: 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=350', color: '#f39c12', count: products.filter(p => p.category_name === 'Indian Dry Fruits').length || '10+' },
                             { name: 'All Products', filter: 'all', sub: 'View Complete Range', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=350', color: '#00b4a0', count: products.length || '76' }
                         ].map((cat, index) => (
                             <div
@@ -712,7 +735,7 @@ const LandingPage = () => {
                                             alt={product.name}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />
-                                        {product.organic && (
+                                        {product.is_organic && (
                                             <span className="organic-badge" style={{
                                                 position: 'absolute',
                                                 top: '10px',
@@ -739,7 +762,7 @@ const LandingPage = () => {
                                             fontSize: '10px',
                                             fontWeight: '600'
                                         }}>
-                                            {getOriginLabel(product.origin)}
+                                            {getOriginLabel(product.origin_country)}
                                         </span>
                                     </div>
                                     <div style={{ padding: '16px', textAlign: 'left' }}>
@@ -754,7 +777,7 @@ const LandingPage = () => {
                                             textTransform: 'uppercase',
                                             marginBottom: '8px'
                                         }}>
-                                            {getCategoryLabel(product.category)}
+                                            {getCategoryLabel(product.category_type || product.parent_category)}
                                         </span>
                                         <h3 style={{
                                             fontFamily: "'Inter', sans-serif",
@@ -774,7 +797,7 @@ const LandingPage = () => {
                                                 ₹{product.price}/{product.unit || 'kg'}
                                             </span>
                                             <span style={{ fontSize: '11px', color: '#999' }}>
-                                                Stock: {product.stock}
+                                                Stock: {product.stock_quantity}
                                             </span>
                                         </div>
                                         <button
@@ -838,7 +861,7 @@ const LandingPage = () => {
             </section>
 
             {/* About Section */}
-            <section id="about" style={{
+            <section id="about" className="scroll-reveal" style={{
                 padding: '80px 5%',
                 background: '#f8fafb'
             }}>
@@ -902,7 +925,7 @@ const LandingPage = () => {
             </section>
 
             {/* Services Section */}
-            <section id="services" style={{
+            <section id="services" className="scroll-reveal" style={{
                 padding: '80px 5%',
                 background: '#fff'
             }}>
@@ -957,7 +980,7 @@ const LandingPage = () => {
             </section>
 
             {/* Why Choose Us */}
-            <section style={{
+            <section className="scroll-reveal" style={{
                 padding: '80px 5%',
                 background: 'linear-gradient(135deg, #00b4a0 0%, #009688 100%)',
                 color: '#fff',
@@ -1025,7 +1048,7 @@ const LandingPage = () => {
             </section>
 
             {/* Testimonials */}
-            <section style={{
+            <section className="scroll-reveal" style={{
                 padding: '80px 5%',
                 background: '#f8fafb'
             }}>
@@ -1142,7 +1165,7 @@ const LandingPage = () => {
             </section>
 
             {/* Contact Section */}
-            <section id="contact" style={{
+            <section id="contact" className="scroll-reveal" style={{
                 padding: '80px 5%',
                 background: '#fff'
             }}>
@@ -1357,8 +1380,13 @@ const LandingPage = () => {
                                 {t('footerDesc')}
                             </p>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                {['f', 'in', 'tw'].map((social, i) => (
-                                    <a key={i} href="#" style={{
+                                {[
+                                    { label: 'f', href: 'https://facebook.com/limpexcustoms', title: 'Facebook' },
+                                    { label: 'in', href: 'https://linkedin.com/company/limpex', title: 'LinkedIn' },
+                                    { label: '𝕏', href: 'https://twitter.com/limpexcustoms', title: 'Twitter' },
+                                    { label: '📷', href: 'https://instagram.com/limpexcustoms', title: 'Instagram' }
+                                ].map((social, i) => (
+                                    <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" title={social.title} style={{
                                         width: '38px',
                                         height: '38px',
                                         borderRadius: '50%',
@@ -1375,7 +1403,7 @@ const LandingPage = () => {
                                     onMouseEnter={(e) => e.target.style.background = '#00b4a0'}
                                     onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.08)'}
                                     >
-                                        {social}
+                                        {social.label}
                                     </a>
                                 ))}
                             </div>
@@ -1388,18 +1416,21 @@ const LandingPage = () => {
                                 { label: t('navServices'), href: '#services' },
                                 { label: 'Shop', href: '#shop' },
                                 { label: 'Track Order', href: '/track-order' },
+                                { label: 'My Cart', href: '/cart' },
                                 { label: t('navContact'), href: '#contact' }
                             ]},
                             { title: t('footerServices'), links: [
-                                { label: t('service1Title'), href: '#services' },
-                                { label: t('service2Title'), href: '#services' },
-                                { label: t('service3Title'), href: '#services' }
+                                { label: 'Customs Clearance', href: '#services' },
+                                { label: 'Import Documentation', href: '#services' },
+                                { label: 'Trade Consulting', href: '#services' },
+                                { label: 'Cargo Handling', href: '#services' }
                             ]},
                             { title: t('footerContact'), links: [
-                                { label: '📍 Mumbai, Maharashtra', href: '#' },
-                                { label: `📞 ${t('phone')}`, href: 'tel:+919892199247' },
+                                { label: '📍 Andheri East, Mumbai, Maharashtra 400069', href: 'https://maps.google.com/?q=Mumbai+Maharashtra+India' },
+                                { label: `📞 +91 98921 99247`, href: 'tel:+919892199247' },
                                 { label: '✉️ info@limpex.com', href: 'mailto:info@limpex.com' },
-                                { label: '💬 WhatsApp', href: 'https://wa.me/919892199247' }
+                                { label: '💬 WhatsApp Us', href: 'https://wa.me/919892199247?text=Hello%20Limpex!' },
+                                { label: '🌐 www.limpex.com', href: '/' }
                             ]}
                         ].map((section, i) => (
                             <div key={i}>
@@ -1409,18 +1440,33 @@ const LandingPage = () => {
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                     {section.links.map((link, j) => (
                                         <li key={j} style={{ marginBottom: '10px' }}>
-                                            <a href={link.href} style={{
-                                                color: '#888',
-                                                textDecoration: 'none',
-                                                fontSize: '13px',
-                                                transition: 'color 0.3s ease',
-                                                lineHeight: '1.8'
-                                            }}
-                                            onMouseEnter={(e) => e.target.style.color = '#00b4a0'}
-                                            onMouseLeave={(e) => e.target.style.color = '#888'}
-                                            >
-                                                {link.label}
-                                            </a>
+                                            {link.href.startsWith('/') ? (
+                                                <Link to={link.href} style={{
+                                                    color: '#888',
+                                                    textDecoration: 'none',
+                                                    fontSize: '13px',
+                                                    transition: 'color 0.3s ease',
+                                                    lineHeight: '1.8'
+                                                }}
+                                                onMouseEnter={(e) => e.target.style.color = '#00b4a0'}
+                                                onMouseLeave={(e) => e.target.style.color = '#888'}
+                                                >
+                                                    {link.label}
+                                                </Link>
+                                            ) : (
+                                                <a href={link.href} style={{
+                                                    color: '#888',
+                                                    textDecoration: 'none',
+                                                    fontSize: '13px',
+                                                    transition: 'color 0.3s ease',
+                                                    lineHeight: '1.8'
+                                                }}
+                                                onMouseEnter={(e) => e.target.style.color = '#00b4a0'}
+                                                onMouseLeave={(e) => e.target.style.color = '#888'}
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>

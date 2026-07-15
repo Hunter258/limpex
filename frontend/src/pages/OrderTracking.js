@@ -58,7 +58,7 @@ const OrderTracking = () => {
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
             `}</style>
 
-            <div style={{ background: 'linear-gradient(135deg, #16a34a, #059669)', padding: '2.5rem 2rem', color: 'white', textAlign: 'center' }}>
+            <div style={{ background: 'linear-gradient(135deg, #00b4a0, #009688)', padding: '2.5rem 2rem', color: 'white', textAlign: 'center' }}>
                 <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', fontWeight: '800', margin: '0 0 0.5rem 0' }}>📦 Track Your Order</h1>
                 <p style={{ fontSize: '1rem', opacity: 0.9, margin: 0 }}>Enter your order number to track delivery status</p>
             </div>
@@ -73,13 +73,13 @@ const OrderTracking = () => {
                             onChange={e => setSearchId(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && trackOrder(searchId)}
                             style={{ flex: 1, padding: '14px 16px', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', outline: 'none', fontFamily: 'Inter, sans-serif', transition: 'border-color 0.2s' }}
-                            onFocus={e => e.target.style.borderColor = '#16a34a'}
+                            onFocus={e => e.target.style.borderColor = '#00b4a0'}
                             onBlur={e => e.target.style.borderColor = '#e5e7eb'}
                         />
                         <button
                             onClick={() => trackOrder(searchId)}
                             disabled={loading}
-                            style={{ padding: '14px 28px', background: 'linear-gradient(135deg, #16a34a, #059669)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(22,163,74,0.3)', whiteSpace: 'nowrap' }}
+                            style={{ padding: '14px 28px', background: 'linear-gradient(135deg, #00b4a0, #009688)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(0,180,160,0.3)', whiteSpace: 'nowrap' }}
                         >
                             {loading ? '...' : 'Track'}
                         </button>
@@ -116,17 +116,26 @@ const OrderTracking = () => {
                                 </div>
                                 <div>
                                     <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Total</p>
-                                    <p style={{ color: '#16a34a', fontWeight: '800', margin: 0, fontSize: '18px' }}>₹{orderData.order.total_amount}</p>
+                                    <p style={{ color: '#00b4a0', fontWeight: '800', margin: 0, fontSize: '18px' }}>₹{orderData.order.total_amount}</p>
                                 </div>
                                 <div>
                                     <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Payment</p>
-                                    <p style={{ color: '#1a1a1a', fontWeight: '600', margin: 0, textTransform: 'capitalize' }}>{orderData.order.payment_method === 'cod' ? 'Cash on Delivery' : orderData.order.payment_method}</p>
+                                    <p style={{ color: '#1a1a1a', fontWeight: '600', margin: 0, textTransform: 'capitalize' }}>{orderData.order.payment_method === 'cod' ? 'Cash on Delivery' : orderData.order.payment_method === 'upi' ? 'UPI Payment' : orderData.order.payment_method === 'card' ? 'Card Payment' : orderData.order.payment_method}</p>
                                 </div>
                                 <div>
                                     <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Delivery Address</p>
                                     <p style={{ color: '#1a1a1a', fontWeight: '600', margin: 0, fontSize: '13px' }}>{orderData.order.delivery_address}</p>
                                 </div>
                             </div>
+                            {orderData.order.delivery_estimate && (
+                                <div style={{ marginTop: '1rem', padding: '12px 16px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span style={{ fontSize: '20px' }}>📦</span>
+                                    <div>
+                                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#166534', margin: 0 }}>Estimated Delivery</p>
+                                        <p style={{ fontSize: '12px', color: '#00b4a0', margin: '2px 0 0 0' }}>{orderData.order.delivery_estimate}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Progress Tracker */}
@@ -134,14 +143,14 @@ const OrderTracking = () => {
                             <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '1.5rem' }}>Delivery Progress</h4>
                             <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', padding: '0 10px' }}>
                                 <div style={{ position: 'absolute', top: '18px', left: '30px', right: '30px', height: '3px', background: '#e5e7eb', zIndex: 0 }}>
-                                    <div style={{ height: '100%', background: '#16a34a', width: `${(currentStepIndex / (statusSteps.length - 1)) * 100}%`, transition: 'width 0.5s ease', borderRadius: '2px' }}></div>
+                                    <div style={{ height: '100%', background: '#00b4a0', width: `${(currentStepIndex / (statusSteps.length - 1)) * 100}%`, transition: 'width 0.5s ease', borderRadius: '2px' }}></div>
                                 </div>
                                 {statusSteps.map((step, i) => (
                                     <div key={step} style={{ textAlign: 'center', zIndex: 1, flex: 1 }}>
-                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: i <= currentStepIndex ? '#16a34a' : '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: '16px', transition: 'all 0.3s ease', boxShadow: i <= currentStepIndex ? '0 2px 8px rgba(22,163,74,0.3)' : 'none' }}>
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: i <= currentStepIndex ? '#00b4a0' : '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: '16px', transition: 'all 0.3s ease', boxShadow: i <= currentStepIndex ? '0 2px 8px rgba(0,180,160,0.3)' : 'none' }}>
                                             {i <= currentStepIndex ? '✓' : statusIcons[step]}
                                         </div>
-                                        <span style={{ fontSize: '10px', fontWeight: '600', color: i <= currentStepIndex ? '#16a34a' : '#9ca3af', lineHeight: '1.2', display: 'block' }}>
+                                        <span style={{ fontSize: '10px', fontWeight: '600', color: i <= currentStepIndex ? '#00b4a0' : '#9ca3af', lineHeight: '1.2', display: 'block' }}>
                                             {statusLabels[step]}
                                         </span>
                                     </div>
@@ -181,7 +190,7 @@ const OrderTracking = () => {
                                             <p style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', margin: 0 }}>{item.product_name}</p>
                                             <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 0 0' }}>{item.quantity} {item.unit} × ₹{item.price}</p>
                                         </div>
-                                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#16a34a' }}>₹{(item.quantity * item.price).toFixed(0)}</span>
+                                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#00b4a0' }}>₹{(item.quantity * item.price).toFixed(0)}</span>
                                     </div>
                                 ))}
                             </div>
