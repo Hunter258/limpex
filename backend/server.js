@@ -319,12 +319,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
-// Start server
-const start = async () => {
-    await initDatabase();
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-};
-
-start();
+// Start server - listen FIRST, then init database
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    initDatabase();
+});
