@@ -91,7 +91,7 @@ const initDatabase = async () => {
             await pool.query('CREATE INDEX idx_products_available ON products(is_available)');
 
             await pool.query(`CREATE TABLE orders (
-                id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id),
+                id SERIAL PRIMARY KEY, user_id UUID REFERENCES users(id),
                 customer_name VARCHAR(255) NOT NULL, customer_email VARCHAR(255),
                 customer_phone VARCHAR(20), delivery_address TEXT NOT NULL,
                 total_amount DECIMAL(10,2) NOT NULL, status VARCHAR(50) DEFAULT 'pending',
