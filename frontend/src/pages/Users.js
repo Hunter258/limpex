@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import * as XLSX from 'xlsx';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
@@ -56,12 +57,28 @@ const Users = () => {
         return <span className={`badge ${badges[role] || 'badge-info'}`}>{role}</span>;
     };
 
+    const exportToExcel = () => {
+        const data = users.map(u => ({
+            Name: `${u.first_name} ${u.last_name}`,
+            Email: u.email,
+            Role: u.role_name,
+            Status: u.is_active ? 'Active' : 'Inactive',
+            'Last Login': u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never',
+            'Created At': new Date(u.created_at).toLocaleDateString()
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Users');
+        XLSX.writeFile(wb, 'users.xlsx');
+    };
+
     if (loading) return <div className="loading">Loading users...</div>;
 
     return (
         <div>
             <div className="page-header">
                 <h1>User Management</h1>
+                <button className="btn btn-primary" onClick={exportToExcel}>Export Users</button>
             </div>
 
             <div className="card">

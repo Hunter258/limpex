@@ -12,6 +12,7 @@ import {
     Legend
 } from 'chart.js';
 import api from '../services/api';
+import * as XLSX from 'xlsx';
 
 ChartJS.register(
     CategoryScale,
@@ -48,6 +49,20 @@ const Analytics = () => {
         }
     };
 
+    const exportToExcel = () => {
+        const data = timeline.map(item => ({
+            Endpoint: item.endpoint,
+            Method: item.method,
+            Status: item.status_code,
+            Duration: item.request_duration_ms,
+            Timestamp: new Date(item.created_at).toLocaleString()
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Analytics');
+        XLSX.writeFile(wb, 'analytics.xlsx');
+    };
+
     const responseData = {
         labels: timeline.slice(0, 20).reverse().map(t => 
             new Date(t.created_at).toLocaleTimeString()
@@ -81,6 +96,7 @@ const Analytics = () => {
         <div>
             <div className="page-header">
                 <h1>Request Analytics</h1>
+                <button className="btn btn-primary" onClick={exportToExcel}>Export Analytics</button>
             </div>
 
             <div className="stats-grid">

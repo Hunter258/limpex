@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import * as XLSX from 'xlsx';
 
 const AuditLogs = () => {
     const [logs, setLogs] = useState([]);
@@ -40,12 +41,27 @@ const AuditLogs = () => {
         return 'badge-info';
     };
 
+    const exportToExcel = () => {
+        const data = logs.map(log => ({
+            Action: log.action,
+            Entity: `${log.entity_type} ${log.entity_id ? '#' + log.entity_id : ''}`.trim(),
+            User: log.email || 'System',
+            'IP Address': log.ip_address,
+            Timestamp: new Date(log.created_at).toLocaleString()
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Audit Logs');
+        XLSX.writeFile(wb, 'audit_logs.xlsx');
+    };
+
     if (loading) return <div className="loading">Loading audit logs...</div>;
 
     return (
         <div>
             <div className="page-header">
                 <h1>Audit Logs</h1>
+                <button className="btn btn-primary" onClick={exportToExcel}>Export Logs</button>
             </div>
 
             <div className="card">

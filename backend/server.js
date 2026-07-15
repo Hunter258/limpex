@@ -79,7 +79,61 @@ const initDatabase = async () => {
             ['admin@limpex.com', passwordHash, 'Admin', 'User']
         );
         console.log('Default admin user ready');
-        
+
+        // Seed products if empty
+        const productCount = await pool.query('SELECT COUNT(*) FROM products');
+        if (parseInt(productCount.rows[0].count) === 0) {
+            console.log('Products table empty, seeding data...');
+
+            await pool.query(`
+                INSERT INTO categories (name, type, parent_category, description) VALUES
+                ('Indian Fruits', 'indian', 'fruits', 'Fresh fruits from India'),
+                ('International Fruits', 'international', 'fruits', 'Imported fruits from around the world'),
+                ('Indian Vegetables', 'indian', 'vegetables', 'Fresh vegetables from India'),
+                ('International Vegetables', 'international', 'vegetables', 'Imported vegetables from around the world'),
+                ('Indian Dry Fruits', 'indian', 'dry_fruits', 'Premium dry fruits from India'),
+                ('International Dry Fruits', 'international', 'dry_fruits', 'Imported dry fruits from around the world')
+                ON CONFLICT (name) DO NOTHING
+            `);
+
+            await pool.query(`
+                INSERT INTO products (category_id, name, description, price, unit, stock_quantity, origin_country, is_organic) VALUES
+                ((SELECT id FROM categories WHERE name = 'Indian Fruits'), 'Mango (Alphonso)', 'Premium Alphonso mangoes from Maharashtra', 200.00, 'kg', 500, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Fruits'), 'Banana (Robusta)', 'Fresh Robusta bananas', 40.00, 'kg', 800, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Fruits'), 'Papaya', 'Ripe and sweet papaya', 60.00, 'kg', 300, 'India', false),
+                ((SELECT id FROM categories WHERE name = 'Indian Fruits'), 'Guava', 'Fresh Indian guava', 80.00, 'kg', 250, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Fruits'), 'Pomegranate', 'Sweet pomegranate seeds', 150.00, 'kg', 400, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'International Fruits'), 'Apple (Fuji)', 'Crisp Fuji apples from USA', 250.00, 'kg', 600, 'USA', false),
+                ((SELECT id FROM categories WHERE name = 'International Fruits'), 'Kiwi', 'Fresh New Zealand kiwi', 300.00, 'kg', 200, 'New Zealand', true),
+                ((SELECT id FROM categories WHERE name = 'International Fruits'), 'Avocado', 'Creamy Hass avocados', 350.00, 'kg', 150, 'Mexico', true),
+                ((SELECT id FROM categories WHERE name = 'International Fruits'), 'Dragon Fruit', 'Exotic dragon fruit', 400.00, 'kg', 100, 'Vietnam', true),
+                ((SELECT id FROM categories WHERE name = 'International Fruits'), 'Blueberry', 'Fresh organic blueberries', 500.00, 'box', 180, 'USA', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Vegetables'), 'Potato', 'Fresh Indian potatoes', 30.00, 'kg', 1000, 'India', false),
+                ((SELECT id FROM categories WHERE name = 'Indian Vegetables'), 'Tomato', 'Fresh organic tomatoes', 40.00, 'kg', 800, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Vegetables'), 'Onion', 'Fresh Indian onions', 25.00, 'kg', 1200, 'India', false),
+                ((SELECT id FROM categories WHERE name = 'Indian Vegetables'), 'Spinach (Palak)', 'Fresh spinach bunches', 30.00, 'bunch', 500, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Vegetables'), 'Cauliflower', 'Fresh cauliflower', 50.00, 'kg', 300, 'India', false),
+                ((SELECT id FROM categories WHERE name = 'International Vegetables'), 'Broccoli', 'Fresh organic broccoli', 120.00, 'kg', 200, 'USA', true),
+                ((SELECT id FROM categories WHERE name = 'International Vegetables'), 'Zucchini', 'Italian zucchini', 100.00, 'kg', 150, 'Italy', true),
+                ((SELECT id FROM categories WHERE name = 'International Vegetables'), 'Sweet Corn', 'Fresh sweet corn', 80.00, 'piece', 400, 'USA', false),
+                ((SELECT id FROM categories WHERE name = 'International Vegetables'), 'Bell Pepper', 'Colorful bell peppers', 150.00, 'kg', 250, 'Netherlands', true),
+                ((SELECT id FROM categories WHERE name = 'International Vegetables'), 'Cherry Tomato', 'Sweet cherry tomatoes', 200.00, 'box', 300, 'Netherlands', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Dry Fruits'), 'Almond (Badam)', 'Premium Indian almonds', 800.00, 'kg', 300, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Dry Fruits'), 'Cashew (Kaju)', 'Fresh Indian cashews', 1000.00, 'kg', 250, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Dry Fruits'), 'Pistachio (Pista)', 'Premium pistachios', 1200.00, 'kg', 200, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Dry Fruits'), 'Raisin (Kishmish)', 'Sweet Indian raisins', 400.00, 'kg', 350, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'Indian Dry Fruits'), 'Walnut (Akhrot)', 'Fresh Indian walnuts', 900.00, 'kg', 180, 'India', true),
+                ((SELECT id FROM categories WHERE name = 'International Dry Fruits'), 'Dates (Khajoor)', 'Premium Iranian dates', 600.00, 'kg', 400, 'Iran', true),
+                ((SELECT id FROM categories WHERE name = 'International Dry Fruits'), 'Fig (Anjeer)', 'Turkish dried figs', 700.00, 'kg', 200, 'Turkey', true),
+                ((SELECT id FROM categories WHERE name = 'International Dry Fruits'), 'Apricot (Khubani)', 'Afghan dried apricots', 500.00, 'kg', 150, 'Afghanistan', true),
+                ((SELECT id FROM categories WHERE name = 'International Dry Fruits'), 'Hazelnut', 'Premium Turkish hazelnuts', 1100.00, 'kg', 120, 'Turkey', true),
+                ((SELECT id FROM categories WHERE name = 'International Dry Fruits'), 'Brazil Nut', 'Fresh Brazil nuts', 1300.00, 'kg', 100, 'Brazil', true)
+                ON CONFLICT DO NOTHING
+            `);
+
+            console.log('30 products seeded across 6 categories');
+        }
+
     } catch (error) {
         console.error('Database init error:', error.message);
     }
