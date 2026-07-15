@@ -52,34 +52,19 @@ const initDatabase = async () => {
     try {
         console.log('Initializing database...');
 
+        // Step 1: Create base schema (users, roles, etc.)
         const schemaPath = path.join(__dirname, '../database/migrations/001_initial_schema.sql');
-        const productsPath = path.join(__dirname, '../database/migrations/002_products_schema.sql');
-
         if (fs.existsSync(schemaPath)) {
-            const schema = fs.readFileSync(schemaPath, 'utf8');
-            await pool.query(schema);
-            console.log('Main schema created');
+            try {
+                const schema = fs.readFileSync(schemaPath, 'utf8');
+                await pool.query(schema);
+                console.log('Main schema created');
+            } catch (e) {
+                console.log('Schema migration note:', e.message);
+            }
         }
 
-        if (fs.existsSync(productsPath)) {
-            const productsSchema = fs.readFileSync(productsPath, 'utf8');
-            await pool.query(productsSchema);
-            console.log('Products schema created');
-        }
-
-        // Ensure image_url column exists on products
-        await pool.query(`
-            DO $$ BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name = 'products' AND column_name = 'image_url'
-                ) THEN
-                    ALTER TABLE products ADD COLUMN image_url VARCHAR(500);
-                END IF;
-            END $$;
-        `);
-
-        // Create default admin user
+        // Step 2: Create default admin user
         const bcrypt = require('bcryptjs');
         const salt = await bcrypt.genSalt(12);
         const passwordHash = await bcrypt.hash('Admin@123', salt);
@@ -92,7 +77,7 @@ const initDatabase = async () => {
         );
         console.log('Default admin user ready');
 
-        // Drop and recreate categories to include Exotic Fruits and Exotic Vegetables
+        // Step 3: Drop and recreate categories/products tables fresh
         await pool.query('DROP TABLE IF EXISTS products CASCADE');
         await pool.query('DROP TABLE IF EXISTS categories CASCADE');
         console.log('Dropped old tables');
@@ -112,7 +97,7 @@ const initDatabase = async () => {
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
                 category_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
-                name VARCHAR(255) NOT NULL,
+                name VARCHAR(255) NOT NULL UNIQUE,
                 description TEXT,
                 price DECIMAL(10,2) NOT NULL,
                 unit VARCHAR(20) DEFAULT 'kg',
@@ -298,6 +283,49 @@ const initDatabase = async () => {
                 is_organic = EXCLUDED.is_organic, image_url = EXCLUDED.image_url
         `);
         console.log('International Dry Fruits seeded');
+
+        // Orders and delivery tables
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS orders (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                customer_name VARCHAR(255) NOT NULL,
+                customer_email VARCHAR(255),
+                customer_phone VARCHAR(20),
+                delivery_address TEXT NOT NULL,
+                total_amount DECIMAL(10,2) NOT NULL,
+                status VARCHAR(50) DEFAULT 'pending',
+                payment_method VARCHAR(50) DEFAULT 'cod',
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS order_items (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+                product_id INTEGER REFERENCES products(id),
+                product_name VARCHAR(255) NOT NULL,
+                quantity INTEGER NOT NULL,
+                price DECIMAL(10,2) NOT NULL,
+                unit VARCHAR(20) DEFAULT 'kg'
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS delivery_tracking (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+                status VARCHAR(50) NOT NULL,
+                location VARCHAR(255),
+                notes TEXT,
+                estimated_delivery TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Orders and delivery tables created');
 
         console.log('Database initialized with 76 products across 8 categories');
     } catch (error) {
@@ -530,6 +558,172 @@ app.get('/api/users', async (req, res) => {
         res.json({ users: result.rows });
     } catch (error) {
         res.json({ users: [] });
+    }
+});
+
+// Order API endpoints
+
+// Create order (public)
+app.post('/api/orders', async (req, res) => {
+    try {
+        const { customerName, customerEmail, customerPhone, deliveryAddress, items, notes, paymentMethod } = req.body;
+        
+        if (!customerName || !deliveryAddress || !items || items.length === 0) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        
+        const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        const orderResult = await pool.query(
+            `INSERT INTO orders (customer_name, customer_email, customer_phone, delivery_address, total_amount, notes, payment_method)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+            [customerName, customerEmail || null, customerPhone || null, deliveryAddress, totalAmount, notes || null, paymentMethod || 'cod']
+        );
+        
+        const order = orderResult.rows[0];
+        
+        for (const item of items) {
+            await pool.query(
+                `INSERT INTO order_items (order_id, product_id, product_name, quantity, price, unit)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [order.id, item.productId || null, item.name, item.quantity, item.price, item.unit || 'kg']
+            );
+        }
+        
+        // Create initial tracking
+        const estimatedDelivery = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 days
+        await pool.query(
+            `INSERT INTO delivery_tracking (order_id, status, notes, estimated_delivery)
+             VALUES ($1, 'confirmed', 'Order placed successfully', $2)`,
+            [order.id, estimatedDelivery]
+        );
+        
+        res.status(201).json({ message: 'Order placed successfully', order });
+    } catch (error) {
+        console.error('Create order error:', error);
+        res.status(500).json({ error: 'Failed to create order' });
+    }
+});
+
+// Track order by ID (public)
+app.get('/api/orders/track/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const orderResult = await pool.query(
+            `SELECT * FROM orders WHERE id = $1`, [id]
+        );
+        
+        if (orderResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        const itemsResult = await pool.query(
+            `SELECT * FROM order_items WHERE order_id = $1`, [id]
+        );
+        
+        const trackingResult = await pool.query(
+            `SELECT * FROM delivery_tracking WHERE order_id = $1 ORDER BY created_at DESC`, [id]
+        );
+        
+        res.json({
+            order: orderResult.rows[0],
+            items: itemsResult.rows,
+            tracking: trackingResult.rows
+        });
+    } catch (error) {
+        console.error('Track order error:', error);
+        res.status(500).json({ error: 'Failed to track order' });
+    }
+});
+
+// Get all orders (admin)
+app.get('/api/orders', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No autorizado' });
+        
+        const jwt = require('jsonwebtoken');
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        
+        const userCheck = await pool.query('SELECT role_id FROM users WHERE id = $1', [decoded.userId]);
+        if (userCheck.rows[0]?.role_id > 2) {
+            return res.status(403).json({ error: 'Sin permisos' });
+        }
+        
+        const result = await pool.query(`
+            SELECT o.*, 
+                   (SELECT json_agg(json_build_object('product_name', oi.product_name, 'quantity', oi.quantity, 'price', oi.price, 'unit', oi.unit))
+                    FROM order_items oi WHERE oi.order_id = o.id) as items,
+                   (SELECT json_build_object('status', dt.status, 'location', dt.location, 'estimated_delivery', dt.estimated_delivery, 'created_at', dt.created_at)
+                    FROM delivery_tracking dt WHERE dt.order_id = o.id ORDER BY dt.created_at DESC LIMIT 1) as latest_tracking
+            FROM orders o
+            ORDER BY o.created_at DESC
+        `);
+        
+        res.json({ orders: result.rows });
+    } catch (error) {
+        console.error('Get orders error:', error);
+        res.json({ orders: [] });
+    }
+});
+
+// Update order status (admin)
+app.put('/api/orders/:id/status', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No autorizado' });
+        
+        const jwt = require('jsonwebtoken');
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        
+        const userCheck = await pool.query('SELECT role_id FROM users WHERE id = $1', [decoded.userId]);
+        if (userCheck.rows[0]?.role_id > 2) {
+            return res.status(403).json({ error: 'Sin permisos' });
+        }
+        
+        const { id } = req.params;
+        const { status, location, notes } = req.body;
+        
+        await pool.query(
+            `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+            [status, id]
+        );
+        
+        await pool.query(
+            `INSERT INTO delivery_tracking (order_id, status, location, notes) VALUES ($1, $2, $3, $4)`,
+            [id, status, location || null, notes || null]
+        );
+        
+        res.json({ message: 'Order status updated' });
+    } catch (error) {
+        console.error('Update order status error:', error);
+        res.status(500).json({ error: 'Failed to update order status' });
+    }
+});
+
+// Delete order (admin)
+app.delete('/api/orders/:id', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No autorizado' });
+        
+        const jwt = require('jsonwebtoken');
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        
+        const userCheck = await pool.query('SELECT role_id FROM users WHERE id = $1', [decoded.userId]);
+        if (userCheck.rows[0]?.role_id > 2) {
+            return res.status(403).json({ error: 'Sin permisos' });
+        }
+        
+        const { id } = req.params;
+        await pool.query('DELETE FROM orders WHERE id = $1', [id]);
+        res.json({ message: 'Order deleted' });
+    } catch (error) {
+        console.error('Delete order error:', error);
+        res.status(500).json({ error: 'Failed to delete order' });
     }
 });
 

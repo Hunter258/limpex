@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 import axios from 'axios';
 
 const LandingPage = () => {
     const { language, changeLanguage, t } = useLanguage();
+    const { addItem, getItemCount, setIsCartOpen } = useCart();
     const [currentTagline, setCurrentTagline] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeCategory, setActiveCategory] = useState('all');
@@ -260,8 +262,28 @@ const LandingPage = () => {
                         { label: t('navAbout'), href: '#about' },
                         { label: t('navServices'), href: '#services' },
                         { label: 'Shop', href: '#shop' },
+                        { label: 'Track Order', href: '/track-order', isRoute: true },
                         { label: t('navContact'), href: '#contact' }
                     ].map((item, index) => (
+                        item.isRoute ? (
+                            <Link
+                                key={index}
+                                to={item.href}
+                                className="nav-link"
+                                style={{
+                                    textDecoration: 'none',
+                                    color: '#333',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    letterSpacing: '0.3px',
+                                    transition: 'color 0.3s ease'
+                                }}
+                                onMouseEnter={(e) => e.target.style.color = '#00b4a0'}
+                                onMouseLeave={(e) => e.target.style.color = '#333'}
+                            >
+                                {item.label}
+                            </Link>
+                        ) : (
                         <a
                             key={index}
                             href={item.href}
@@ -303,6 +325,26 @@ const LandingPage = () => {
                         }}
                     >
                         {t('navLogin')}
+                    </Link>
+                    <Link
+                        to="/cart"
+                        style={{
+                            textDecoration: 'none',
+                            background: '#fff',
+                            color: '#00b4a0',
+                            padding: '9px 16px',
+                            borderRadius: '22px',
+                            fontSize: '13px',
+                            fontWeight: '700',
+                            transition: 'all 0.3s ease',
+                            border: '2px solid #00b4a0',
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }}
+                    >
+                        🛒 Cart {getItemCount() > 0 && <span style={{ background: '#00b4a0', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800' }}>{getItemCount()}</span>}
                     </Link>
                 </div>
 
@@ -735,6 +777,29 @@ const LandingPage = () => {
                                                 Stock: {product.stock}
                                             </span>
                                         </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                addItem(product, 1);
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                marginTop: '10px',
+                                                padding: '9px',
+                                                background: 'linear-gradient(135deg, #00b4a0, #009688)',
+                                                color: '#fff',
+                                                border: 'none',
+                                                borderRadius: '10px',
+                                                fontSize: '12px',
+                                                fontWeight: '700',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                boxShadow: '0 2px 8px rgba(0,180,160,0.2)',
+                                                fontFamily: 'Inter, sans-serif'
+                                            }}
+                                        >
+                                            🛒 Order Now
+                                        </button>
                                     </div>
                                 </div>
                             ))
@@ -1322,6 +1387,7 @@ const LandingPage = () => {
                                 { label: t('navAbout'), href: '#about' },
                                 { label: t('navServices'), href: '#services' },
                                 { label: 'Shop', href: '#shop' },
+                                { label: 'Track Order', href: '/track-order' },
                                 { label: t('navContact'), href: '#contact' }
                             ]},
                             { title: t('footerServices'), links: [
@@ -1387,6 +1453,49 @@ const LandingPage = () => {
                     </div>
                 </div>
             </footer>
+
+            {/* Floating Cart Button */}
+            <Link
+                to="/cart"
+                style={{
+                    position: 'fixed',
+                    bottom: '90px',
+                    right: '25px',
+                    width: '55px',
+                    height: '55px',
+                    background: 'linear-gradient(135deg, #00b4a0, #009688)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 20px rgba(0,180,160,0.5)',
+                    zIndex: 1000,
+                    textDecoration: 'none',
+                    animation: 'pulse 2s infinite'
+                }}
+            >
+                <span style={{ fontSize: '24px', color: '#fff' }}>🛒</span>
+                {getItemCount() > 0 && (
+                    <span style={{
+                        position: 'absolute',
+                        top: '-4px',
+                        right: '-4px',
+                        background: '#ef4444',
+                        color: '#fff',
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: '800',
+                        border: '2px solid #fff'
+                    }}>
+                        {getItemCount()}
+                    </span>
+                )}
+            </Link>
 
             {/* Floating WhatsApp Button */}
             <a

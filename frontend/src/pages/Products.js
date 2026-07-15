@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 import * as XLSX from 'xlsx';
 
 const getProductImage = (name, category) => {
@@ -23,6 +24,7 @@ const PRODUCTS_PER_PAGE = 12;
 
 const Products = () => {
     const { t } = useLanguage();
+    const { addItem, getItemCount } = useCart();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -517,6 +519,37 @@ const Products = () => {
                                             {stock.label}
                                         </span>
                                     </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            addItem(product, 1);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            marginTop: '0.75rem',
+                                            padding: '10px',
+                                            background: 'linear-gradient(135deg, #16a34a, #059669)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '10px',
+                                            fontSize: '13px',
+                                            fontWeight: '700',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                            boxShadow: '0 2px 8px rgba(22,163,74,0.2)',
+                                            fontFamily: 'Inter, sans-serif'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.transform = 'translateY(-1px)';
+                                            e.target.style.boxShadow = '0 4px 12px rgba(22,163,74,0.3)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.transform = 'translateY(0)';
+                                            e.target.style.boxShadow = '0 2px 8px rgba(22,163,74,0.2)';
+                                        }}
+                                    >
+                                        🛒 Order Now
+                                    </button>
                                 </div>
                             </div>
                         );
