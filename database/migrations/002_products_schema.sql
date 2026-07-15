@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_products_category ON products(category_id);
-CREATE INDEX idx_products_available ON products(is_available);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_available ON products(is_available);
 
 -- Insert categories
 INSERT INTO categories (name, type, parent_category, description) VALUES
