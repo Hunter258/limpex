@@ -1079,6 +1079,32 @@ app.get('/api/analytics/dashboard', authenticate, authorize('super_admin', 'admi
     }
 });
 
+app.get('/api/analytics/timeline', authenticate, authorize('super_admin', 'admin'), async (req, res, next) => {
+    try {
+        const result = await pool.query(`
+            SELECT endpoint, method, status_code, request_duration_ms, source_ip, created_at
+            FROM analytics ORDER BY created_at DESC LIMIT 100
+        `);
+        res.json({ timeline: result.rows });
+    } catch (error) {
+        res.json({ timeline: [] });
+    }
+});
+
+app.get('/api/analytics/containers', authenticate, authorize('super_admin', 'admin'), async (req, res, next) => {
+    try {
+        const result = await pool.query(`
+            SELECT container_id, COUNT(*) as total_requests,
+                   AVG(request_duration_ms)::integer as avg_response_time,
+                   MIN(created_at) as first_seen, MAX(created_at) as last_seen
+            FROM analytics GROUP BY container_id ORDER BY total_requests DESC
+        `);
+        res.json({ containers: result.rows });
+    } catch (error) {
+        res.json({ containers: [] });
+    }
+});
+
 app.put('/api/users/:id/role', authenticate, authorize('super_admin'), async (req, res, next) => {
     try {
         const { id } = req.params;
