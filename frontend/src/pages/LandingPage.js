@@ -4,6 +4,99 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import axios from 'axios';
 
+const useCountUp = (target, duration = 2000) => {
+    const [count, setCount] = useState(0);
+    const [hasStarted, setHasStarted] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        if (!ref.current || hasStarted) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setHasStarted(true);
+                    const start = performance.now();
+                    const animate = (now) => {
+                        const progress = Math.min((now - start) / duration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3);
+                        setCount(Math.floor(eased * target));
+                        if (progress < 1) requestAnimationFrame(animate);
+                    };
+                    requestAnimationFrame(animate);
+                }
+            },
+            { threshold: 0.3 }
+        );
+        observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [target, duration, hasStarted]);
+
+    return [ref, count];
+};
+
+const StatsCounter = () => {
+    const [yearRef, year] = useCountUp(2010, 2000);
+    const [growersRef, growers] = useCountUp(500, 2500);
+    const [mtRef, mt] = useCountUp(65000, 3000);
+    const [varietiesRef, varieties] = useCountUp(500, 2000);
+
+    const formatNumber = (num) => {
+        if (num >= 1000) return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}K`;
+        return num;
+    };
+
+    return (
+        <section className="py-16 px-[5%] bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 text-white relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-brand-400 blur-[100px]" />
+                <div className="absolute bottom-0 right-1/4 w-[250px] h-[250px] rounded-full bg-brand-300 blur-[80px]" />
+            </div>
+            <div className="max-w-[1100px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 text-center relative z-10">
+                <div ref={yearRef}>
+                    <div className="font-display text-4xl lg:text-5xl font-bold mb-2">{year}</div>
+                    <div className="text-white/70 text-sm font-medium uppercase tracking-wider">Foundation Year</div>
+                </div>
+                <div ref={growersRef}>
+                    <div className="font-display text-4xl lg:text-5xl font-bold mb-2">{growers}+</div>
+                    <div className="text-white/70 text-sm font-medium uppercase tracking-wider">Trusted Growers</div>
+                </div>
+                <div ref={mtRef}>
+                    <div className="font-display text-4xl lg:text-5xl font-bold mb-2">{formatNumber(mt)} MT</div>
+                    <div className="text-white/70 text-sm font-medium uppercase tracking-wider">Annual Produce</div>
+                </div>
+                <div ref={varietiesRef}>
+                    <div className="font-display text-4xl lg:text-5xl font-bold mb-2">{varieties}+</div>
+                    <div className="text-white/70 text-sm font-medium uppercase tracking-wider">Product Varieties</div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const HeroStats = () => {
+    const [yearsRef, years] = useCountUp(25, 2000);
+    const [shipmentsRef, shipments] = useCountUp(10000, 2500);
+    const [clientsRef, clients] = useCountUp(500, 2000);
+    return (
+        <div className="flex gap-8 mt-10 pt-8 border-t border-white/20">
+            <div ref={yearsRef}>
+                <h3 className="text-white text-[28px] font-bold font-display">{years}+</h3>
+                <p className="text-white/80 text-[13px]">Years Experience</p>
+            </div>
+            <div ref={shipmentsRef}>
+                <h3 className="text-white text-[28px] font-bold font-display">
+                    {shipments >= 1000 ? `${(shipments / 1000).toFixed(shipments >= 10000 ? 0 : 1)}K` : shipments}+
+                </h3>
+                <p className="text-white/80 text-[13px]">Shipments Cleared</p>
+            </div>
+            <div ref={clientsRef}>
+                <h3 className="text-white text-[28px] font-bold font-display">{clients}+</h3>
+                <p className="text-white/80 text-[13px]">Happy Clients</p>
+            </div>
+        </div>
+    );
+};
+
 const LandingPage = () => {
     const { language, changeLanguage, t } = useLanguage();
     const { addItem, getItemCount, setIsCartOpen } = useCart();
@@ -128,6 +221,14 @@ const LandingPage = () => {
                 .nav-link { position: relative; }
                 .nav-link::after { content: ''; position: absolute; bottom: -5px; left: 50%; width: 0; height: 2px; background: #00b4a0; transition: all 0.3s ease; transform: translateX(-50%); }
                 .nav-link:hover::after { width: 100%; }
+                .fruit-carousel { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 10px 0; }
+                .fruit-carousel::-webkit-scrollbar { display: none; }
+                .fruit-carousel-item { scroll-snap-align: start; flex: 0 0 240px; }
+                .logo-scroll { display: flex; gap: 40px; animation: scrollLogos 25s linear infinite; }
+                .logo-scroll-reverse { animation-direction: reverse; }
+                @keyframes scrollLogos { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+                @keyframes countPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+                .count-pulse { animation: countPulse 2s ease-in-out infinite; }
             `}</style>
 
             {/* Language Switcher */}
@@ -302,20 +403,7 @@ const LandingPage = () => {
                         </a>
                     </div>
 
-                    <div className="flex gap-8 mt-10 pt-8 border-t border-white/20">
-                        <div>
-                            <h3 className="text-white text-[28px] font-bold font-display">25+</h3>
-                            <p className="text-white/80 text-[13px]">Years Experience</p>
-                        </div>
-                        <div>
-                            <h3 className="text-white text-[28px] font-bold font-display">10K+</h3>
-                            <p className="text-white/80 text-[13px]">Shipments Cleared</p>
-                        </div>
-                        <div>
-                            <h3 className="text-white text-[28px] font-bold font-display">500+</h3>
-                            <p className="text-white/80 text-[13px]">Happy Clients</p>
-                        </div>
-                    </div>
+                    <HeroStats />
                 </div>
             </section>
 
@@ -334,6 +422,53 @@ const LandingPage = () => {
                             <span className="text-[13px] font-medium text-gray-500">{item.label}</span>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* Our Fruit Family - Horizontal Carousel */}
+            <section className="scroll-reveal py-16 px-[5%] bg-white overflow-hidden">
+                <div className="max-w-[1200px] mx-auto text-center mb-10">
+                    <p className="section-label">OUR PRODUCE FAMILY</p>
+                    <h2 className="section-title mb-4">Fresh From Farm to Table</h2>
+                    <p className="section-subtitle mx-auto">
+                        Explore our premium range of fresh fruits, vegetables, and dry fruits sourced from trusted growers
+                    </p>
+                </div>
+                <div className="max-w-[1200px] mx-auto">
+                    <div className="fruit-carousel">
+                        {[
+                            { name: 'Indian Fruits', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400', count: products.filter(p => p.category_name === 'Indian Fruits').length || 10, filter: 'Indian Fruits' },
+                            { name: 'International Fruits', img: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=400', count: products.filter(p => p.category_name === 'International Fruits').length || 10, filter: 'International Fruits' },
+                            { name: 'Exotic Fruits', img: 'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=400', count: products.filter(p => p.category_name === 'Exotic Fruits').length || 8, filter: 'Exotic Fruits' },
+                            { name: 'Indian Vegetables', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400', count: products.filter(p => p.category_name === 'Indian Vegetables').length || 10, filter: 'Indian Vegetables' },
+                            { name: 'International Vegetables', img: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400', count: products.filter(p => p.category_name === 'International Vegetables').length || 8, filter: 'International Vegetables' },
+                            { name: 'Exotic Vegetables', img: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400', count: products.filter(p => p.category_name === 'Exotic Vegetables').length || 8, filter: 'Exotic Vegetables' },
+                            { name: 'Indian Dry Fruits', img: 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400', count: products.filter(p => p.category_name === 'Indian Dry Fruits').length || 10, filter: 'Indian Dry Fruits' },
+                            { name: 'International Dry Fruits', img: 'https://images.unsplash.com/photo-1506484381205-f7945b68db56?w=400', count: products.filter(p => p.category_name === 'International Dry Fruits').length || 8, filter: 'International Dry Fruits' }
+                        ].map((item, index) => (
+                            <div
+                                key={index}
+                                className="fruit-carousel-item group cursor-pointer"
+                                onClick={() => {
+                                    setActiveCategory(item.filter);
+                                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                            >
+                                <div className="relative rounded-2xl overflow-hidden shadow-card h-[200px] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-card-hover">
+                                    <img
+                                        src={item.img}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                    <div className="absolute bottom-0 inset-x-0 p-4 text-white">
+                                        <h3 className="font-display text-base font-bold mb-0.5">{item.name}</h3>
+                                        <p className="text-white/80 text-xs">{item.count}+ Products</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
@@ -470,6 +605,9 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            {/* Stats Counter Banner */}
+            <StatsCounter />
+
             {/* About Section */}
             <section id="about" className="scroll-reveal py-20 px-[5%] bg-brand-50/30 scroll-mt-20">
                 <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -504,6 +642,38 @@ const LandingPage = () => {
                         />
                         <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-8 text-white">
                             <p className="text-sm font-semibold">Trusted by 500+ businesses across India</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Corporate Video */}
+            <section className="scroll-reveal py-20 px-[5%] bg-white">
+                <div className="max-w-[1200px] mx-auto text-center">
+                    <p className="section-label">ABOUT US</p>
+                    <h2 className="section-title mb-4">See How We Work</h2>
+                    <p className="section-subtitle mx-auto mb-12">
+                        Watch how Limpex connects farms across India and the world to deliver freshness to your doorstep
+                    </p>
+                    <div className="relative rounded-3xl overflow-hidden shadow-elevated max-w-[800px] mx-auto">
+                        <img
+                            src="https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800"
+                            alt="Limpex operations"
+                            className="w-full h-[400px] lg:h-[450px] object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <a
+                                href="https://wa.me/919892199247"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-20 h-20 rounded-full bg-white/95 flex items-center justify-center shadow-[0_8px_40px_rgba(0,0,0,0.3)] hover:scale-110 transition-transform duration-300 cursor-pointer"
+                            >
+                                <span className="text-brand-500 text-3xl ml-1">▶</span>
+                            </a>
+                        </div>
+                        <div className="absolute bottom-0 inset-x-0 p-6 text-left text-white bg-gradient-to-t from-black/80 to-transparent">
+                            <p className="text-sm font-semibold">Watch our story</p>
+                            <p className="text-xs text-white/70">From farm to table — how we ensure freshness</p>
                         </div>
                     </div>
                 </div>
@@ -602,6 +772,58 @@ const LandingPage = () => {
                             </div>
                         ))}
                     </div>
+                </div>
+            </section>
+
+            {/* Brand Logos - Partner Suppliers */}
+            <section className="scroll-reveal py-14 px-[5%] bg-white border-t border-gray-100 overflow-hidden">
+                <div className="max-w-[1200px] mx-auto text-center mb-10">
+                    <p className="section-label">TRUSTED SUPPLIERS & PARTNERS</p>
+                    <h2 className="section-title mb-0">Our Brand Family</h2>
+                </div>
+                <div className="relative overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+                    <div className="logo-scroll">
+                        {['Zespri', 'Rockit', 'Driscoll\'s', 'Del Monte', 'Dole', 'Chiquita', 'Sunkist', 'Tropicana', 'Fresh Del Monte', 'Nature\'s Path'].concat(
+                            ['Zespri', 'Rockit', 'Driscoll\'s', 'Del Monte', 'Dole', 'Chiquita', 'Sunkist', 'Tropicana', 'Fresh Del Monte', 'Nature\'s Path']
+                        ).map((brand, i) => (
+                            <div key={i} className="flex-shrink-0 w-[160px] h-[70px] bg-gray-50 rounded-xl flex items-center justify-center px-5 border border-gray-100 hover:border-brand-500/30 hover:shadow-sm transition-all duration-300">
+                                <span className="text-gray-400 font-display text-sm font-bold whitespace-nowrap hover:text-brand-500 transition-colors">{brand}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Customer Logos - Who We Serve */}
+            <section className="scroll-reveal py-14 px-[5%] bg-brand-50/30 border-t border-gray-100 overflow-hidden">
+                <div className="max-w-[1200px] mx-auto text-center mb-10">
+                    <p className="section-label">TRUSTED BY INDUSTRY LEADERS</p>
+                    <h2 className="section-title mb-0">Our Valued Customers</h2>
+                </div>
+                <div className="max-w-[1200px] mx-auto grid grid-cols-3 md:grid-cols-5 gap-6">
+                    {[
+                        { name: 'BigBasket', color: '#8bc34a' },
+                        { name: 'Swiggy Instamart', color: '#fc8019' },
+                        { name: 'Blinkit', color: '#f9d71c' },
+                        { name: 'Zepto', color: '#6c3ec1' },
+                        { name: 'Nature\'s Basket', color: '#4caf50' },
+                        { name: 'Reliance Fresh', color: '#e91e63' },
+                        { name: 'DMart', color: '#1565c0' },
+                        { name: 'More超市', color: '#ff6f00' },
+                        { name: ' Spencer\'s', color: '#00897b' },
+                        { name: 'FoodWorld', color: '#d32f2f' }
+                    ].map((customer, i) => (
+                        <div
+                            key={i}
+                            className="bg-white rounded-xl p-5 flex items-center justify-center h-[75px] border border-gray-100 hover:border-brand-500/30 hover:shadow-card transition-all duration-300 cursor-default"
+                        >
+                            <span className="font-display text-xs font-bold text-gray-400 whitespace-nowrap" style={{ color: customer.color + '80' }}>
+                                {customer.name}
+                            </span>
+                        </div>
+                    ))}
                 </div>
             </section>
 
