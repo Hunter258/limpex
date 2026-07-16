@@ -935,6 +935,9 @@ app.post('/api/payments/create-order', authenticate, async (req, res, next) => {
         if (!amount || amount <= 0) {
             return res.status(400).json({ error: 'Valid amount is required' });
         }
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            return res.status(503).json({ error: 'Online payment is not configured. Please use Cash on Delivery.', configured: false });
+        }
         const order = await createRazorpayOrder(amount, `user_${req.user.id}_${Date.now()}`);
         res.json({ orderId: order.id, amount: order.amount, currency: order.currency });
     } catch (error) {
@@ -987,7 +990,7 @@ app.get('*', (req, res) => {
 
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err.message);
-    if (err.name === 'CORS') {
+    if (err.message === 'Not allowed by CORS') {
         return res.status(403).json({ error: 'Origin not allowed by CORS' });
     }
     res.status(err.status || 500).json({
