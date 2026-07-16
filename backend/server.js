@@ -9,6 +9,8 @@ const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 const pool = require('./config/database');
+const { createRazorpayOrder, verifyRazorpayPayment } = require('./services/payment');
+const { sendOrderConfirmation, sendOrderStatusUpdate } = require('./services/email');
 
 dotenv.config();
 
@@ -707,6 +709,8 @@ app.post('/api/orders', async (req, res, next) => {
 
         await client.query('COMMIT');
 
+        sendOrderConfirmation(order, validatedItems).catch(e => console.error('Order email failed:', e.message));
+
         res.status(201).json({ message: 'Order placed successfully', order: { ...order, totalAmount } });
     } catch (error) {
         await client.query('ROLLBACK');
@@ -801,6 +805,11 @@ app.put('/api/orders/:id/status', authenticate, authorize('super_admin', 'admin'
             [orderId, status, sanitizeString(location) || null, sanitizeString(notes) || null]
         );
 
+        const orderResult = await pool.query('SELECT customer_name, customer_email, total_amount FROM orders WHERE id = $1', [orderId]);
+        if (orderResult.rows.length > 0 && orderResult.rows[0].customer_email) {
+            sendOrderStatusUpdate({ ...orderResult.rows[0], id: orderId }, status).catch(e => console.error('Status email failed:', e.message));
+        }
+
         res.json({ message: 'Order status updated' });
     } catch (error) {
         next(error);
@@ -822,6 +831,42 @@ app.delete('/api/orders/:id', authenticate, authorize('super_admin'), async (req
 
         await pool.query('DELETE FROM orders WHERE id = $1', [orderId]);
         res.json({ message: 'Order deleted' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/api/payments/config', (req, res) => {
+    res.json({
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID || null,
+        configured: !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
+    });
+});
+
+app.post('/api/payments/create-order', authenticate, async (req, res, next) => {
+    try {
+        const { amount } = req.body;
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ error: 'Valid amount is required' });
+        }
+        const order = await createRazorpayOrder(amount, `user_${req.user.id}_${Date.now()}`);
+        res.json({ orderId: order.id, amount: order.amount, currency: order.currency });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/payments/verify', authenticate, async (req, res, next) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return res.status(400).json({ error: 'Missing payment verification fields' });
+        }
+        const isValid = verifyRazorpayPayment(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+        if (!isValid) {
+            return res.status(400).json({ error: 'Payment verification failed' });
+        }
+        res.json({ verified: true, paymentId: razorpay_payment_id });
     } catch (error) {
         next(error);
     }
