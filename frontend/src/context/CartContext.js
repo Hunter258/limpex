@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 const CartContext = createContext();
 
@@ -16,17 +16,18 @@ export const CartProvider = ({ children }) => {
             return [];
         }
     });
-    const [isCartOpen, setIsCartOpen] = useState(false);
 
     useEffect(() => {
         localStorage.setItem('limpex_cart', JSON.stringify(items));
     }, [items]);
 
-    const addItem = (product, quantity = 1) => {
+    const addItem = useCallback((product, quantity = 1) => {
         setItems(prev => {
             const existing = prev.find(i => i.id === product.id);
             if (existing) {
-                return prev.map(i => i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i);
+                const maxQty = product.stock_quantity || 999;
+                const newQty = Math.min(existing.quantity + quantity, maxQty);
+                return prev.map(i => i.id === product.id ? { ...i, quantity: newQty } : i);
             }
             return [...prev, {
                 id: product.id,
@@ -38,31 +39,36 @@ export const CartProvider = ({ children }) => {
                 stock_quantity: product.stock_quantity
             }];
         });
-        setIsCartOpen(true);
-    };
+    }, []);
 
-    const removeItem = (productId) => {
+    const removeItem = useCallback((productId) => {
         setItems(prev => prev.filter(i => i.id !== productId));
-    };
+    }, []);
 
-    const updateQuantity = (productId, quantity) => {
+    const updateQuantity = useCallback((productId, quantity) => {
         if (quantity <= 0) {
-            removeItem(productId);
+            setItems(prev => prev.filter(i => i.id !== productId));
             return;
         }
-        setItems(prev => prev.map(i => i.id === productId ? { ...i, quantity } : i));
-    };
+        setItems(prev => prev.map(i => {
+            if (i.id === productId) {
+                const maxQty = i.stock_quantity || 999;
+                return { ...i, quantity: Math.min(quantity, maxQty) };
+            }
+            return i;
+        }));
+    }, []);
 
-    const clearCart = () => setItems([]);
+    const clearCart = useCallback(() => setItems([]), []);
 
-    const getTotal = () => items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    const getItemCount = () => items.reduce((sum, item) => sum + item.quantity, 0);
+    const total = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
+    const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
 
     return (
         <CartContext.Provider value={{
             items, addItem, removeItem, updateQuantity, clearCart,
-            getTotal, getItemCount, isCartOpen, setIsCartOpen
+            getTotal: () => total,
+            getItemCount: () => itemCount
         }}>
             {children}
         </CartContext.Provider>
