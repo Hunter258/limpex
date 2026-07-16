@@ -25,7 +25,14 @@ const CartPage = () => {
         customerName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
         customerEmail: user?.email || '',
         customerPhone: '',
-        deliveryAddress: '',
+        address: {
+            flat: '',
+            street: '',
+            landmark: '',
+            city: '',
+            state: '',
+            pincode: ''
+        },
         notes: '',
         paymentMethod: 'cod'
     });
@@ -53,10 +60,20 @@ const CartPage = () => {
         if (!orderForm.customerPhone.trim()) errors.customerPhone = 'Phone is required';
         else if (!/^[+]?[\d\s\-()]{7,15}$/.test(orderForm.customerPhone.trim())) errors.customerPhone = 'Invalid phone number';
         if (orderForm.customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orderForm.customerEmail)) errors.customerEmail = 'Invalid email';
-        if (!orderForm.deliveryAddress.trim()) errors.deliveryAddress = 'Address is required';
-        else if (orderForm.deliveryAddress.trim().length < 10) errors.deliveryAddress = 'Please provide a complete address';
+        if (!orderForm.address.flat.trim()) errors.flat = 'House/Flat number is required';
+        if (!orderForm.address.street.trim()) errors.street = 'Street/Road is required';
+        if (!orderForm.address.city.trim()) errors.city = 'City is required';
+        if (!orderForm.address.state.trim()) errors.state = 'State is required';
+        if (!orderForm.address.pincode.trim()) errors.pincode = 'PIN code is required';
+        else if (!/^\d{6}$/.test(orderForm.address.pincode.trim())) errors.pincode = 'Enter valid 6-digit PIN code';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
+    };
+
+    const formatAddress = () => {
+        const a = orderForm.address;
+        const parts = [a.flat, a.street, a.landmark, `${a.city}, ${a.state} - ${a.pincode}`].filter(Boolean);
+        return parts.join(', ');
     };
 
     const placeOrder = useCallback(async (paymentDetails) => {
@@ -67,7 +84,7 @@ const CartPage = () => {
                 customerName: orderForm.customerName.trim(),
                 customerPhone: orderForm.customerPhone.trim(),
                 customerEmail: orderForm.customerEmail.trim(),
-                deliveryAddress: orderForm.deliveryAddress.trim(),
+                deliveryAddress: formatAddress(),
                 notes: orderForm.notes.trim(),
                 paymentMethod: orderForm.paymentMethod,
                 items: items.map(i => ({
@@ -291,15 +308,42 @@ const CartPage = () => {
                                             </div>
                                         ))}
 
-                                        <div style={{ marginBottom: '8px' }}>
-                                            <textarea
-                                                placeholder="Delivery Address *"
-                                                value={orderForm.deliveryAddress}
-                                                onChange={e => setOrderForm({...orderForm, deliveryAddress: e.target.value})}
-                                                rows="3"
-                                                style={{ width: '100%', padding: '10px 12px', border: formErrors.deliveryAddress ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', resize: 'vertical', fontFamily: 'Inter, sans-serif' }}
-                                            />
-                                            {formErrors.deliveryAddress && <span style={{ fontSize: '11px', color: '#dc2626' }}>{formErrors.deliveryAddress}</span>}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                                            <div>
+                                                <input type="text" placeholder="House/Flat No. *" value={orderForm.address.flat}
+                                                    onChange={e => setOrderForm({...orderForm, address: {...orderForm.address, flat: e.target.value}})}
+                                                    style={{ width: '100%', padding: '10px 12px', border: formErrors.flat ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                                                {formErrors.flat && <span style={{ fontSize: '11px', color: '#dc2626' }}>{formErrors.flat}</span>}
+                                            </div>
+                                            <div>
+                                                <input type="text" placeholder="Street/Road *" value={orderForm.address.street}
+                                                    onChange={e => setOrderForm({...orderForm, address: {...orderForm.address, street: e.target.value}})}
+                                                    style={{ width: '100%', padding: '10px 12px', border: formErrors.street ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                                                {formErrors.street && <span style={{ fontSize: '11px', color: '#dc2626' }}>{formErrors.street}</span>}
+                                            </div>
+                                        </div>
+                                        <input type="text" placeholder="Landmark (optional)" value={orderForm.address.landmark}
+                                            onChange={e => setOrderForm({...orderForm, address: {...orderForm.address, landmark: e.target.value}})}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }} />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                                            <div>
+                                                <input type="text" placeholder="City *" value={orderForm.address.city}
+                                                    onChange={e => setOrderForm({...orderForm, address: {...orderForm.address, city: e.target.value}})}
+                                                    style={{ width: '100%', padding: '10px 12px', border: formErrors.city ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                                                {formErrors.city && <span style={{ fontSize: '11px', color: '#dc2626' }}>{formErrors.city}</span>}
+                                            </div>
+                                            <div>
+                                                <input type="text" placeholder="State *" value={orderForm.address.state}
+                                                    onChange={e => setOrderForm({...orderForm, address: {...orderForm.address, state: e.target.value}})}
+                                                    style={{ width: '100%', padding: '10px 12px', border: formErrors.state ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                                                {formErrors.state && <span style={{ fontSize: '11px', color: '#dc2626' }}>{formErrors.state}</span>}
+                                            </div>
+                                            <div>
+                                                <input type="text" placeholder="PIN *" maxLength="6" value={orderForm.address.pincode}
+                                                    onChange={e => setOrderForm({...orderForm, address: {...orderForm.address, pincode: e.target.value.replace(/\D/g, '')}})}
+                                                    style={{ width: '100%', padding: '10px 12px', border: formErrors.pincode ? '1.5px solid #dc2626' : '1.5px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', fontFamily: 'Inter, sans-serif' }} />
+                                                {formErrors.pincode && <span style={{ fontSize: '11px', color: '#dc2626' }}>{formErrors.pincode}</span>}
+                                            </div>
                                         </div>
 
                                         <textarea
