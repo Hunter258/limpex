@@ -711,7 +711,17 @@ app.get('/api/users', authenticate, authorize('super_admin', 'admin'), async (re
         params.push(safeLimit, offset);
 
         const result = await pool.query(query, params);
-        res.json({ users: result.rows });
+        const countResult = await pool.query('SELECT COUNT(*) FROM users u JOIN roles r ON u.role_id = r.id WHERE 1=1' + (search ? ` AND (u.email ILIKE $1 OR u.first_name ILIKE $1 OR u.last_name ILIKE $1)` : ''), search ? [`%${sanitizeString(search)}%`] : []);
+
+        res.json({
+            users: result.rows,
+            pagination: {
+                total: parseInt(countResult.rows[0].count),
+                page: parseInt(page) || 1,
+                limit: safeLimit,
+                pages: Math.ceil(parseInt(countResult.rows[0].count) / safeLimit)
+            }
+        });
     } catch (error) {
         next(error);
     }
@@ -1009,6 +1019,140 @@ app.post('/api/contact', async (req, res, next) => {
         }
         logger.info('Contact form submission', { name, email, subject });
         res.json({ message: 'Thank you for your message. We will get back to you within 24 hours.' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/auth/refresh', async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return res.status(400).json({ error: 'Refresh token required' });
+        }
+        const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+        const token = jwt.sign({ userId: decoded.userId }, JWT_SECRET, { expiresIn: '24h' });
+        const newRefreshToken = jwt.sign({ userId: decoded.userId, type: 'refresh' }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        res.json({ token, refreshToken: newRefreshToken });
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid refresh token' });
+    }
+});
+
+app.get('/api/analytics/dashboard', authenticate, authorize('super_admin', 'admin', 'editor'), async (req, res, next) => {
+    try {
+        const { period = '7d' } = req.query;
+        let interval;
+        switch (period) {
+            case '24h': interval = '24 hours'; break;
+            case '7d': interval = '7 days'; break;
+            case '30d': interval = '30 days'; break;
+            default: interval = '7 days';
+        }
+
+        const [orderStats, revenueStats, recentOrders, statusCounts] = await Promise.all([
+            pool.query(`SELECT COUNT(*) as total_orders, COUNT(CASE WHEN created_at > NOW() - $1::interval THEN 1 END) as recent_orders FROM orders`, [interval]),
+            pool.query(`SELECT COALESCE(SUM(total_amount), 0) as total_revenue, COALESCE(SUM(CASE WHEN created_at > NOW() - $1::interval THEN total_amount ELSE 0 END), 0) as recent_revenue FROM orders WHERE status != 'cancelled'`, [interval]),
+            pool.query(`SELECT id, customer_name, total_amount, status, created_at FROM orders ORDER BY created_at DESC LIMIT 10`),
+            pool.query(`SELECT status, COUNT(*) as count FROM orders GROUP BY status`)
+        ]);
+
+        res.json({
+            stats: {
+                total_orders: parseInt(orderStats.rows[0].total_orders),
+                recent_orders: parseInt(orderStats.rows[0].recent_orders),
+                total_revenue: parseFloat(revenueStats.rows[0].total_revenue),
+                recent_revenue: parseFloat(revenueStats.rows[0].recent_revenue),
+                total_users: 0,
+                error_count: 0,
+                avg_response_time: 0
+            },
+            recentOrders: recentOrders.rows,
+            orderStatuses: statusCounts.rows,
+            topEndpoints: [],
+            responseTimes: [],
+            userActivity: [],
+            sourceStats: []
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.put('/api/users/:id/role', authenticate, authorize('super_admin'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { roleId } = req.body;
+
+        const roleCheck = await pool.query('SELECT id FROM roles WHERE id = $1', [roleId]);
+        if (roleCheck.rows.length === 0) {
+            return res.status(400).json({ error: 'Invalid role' });
+        }
+
+        await pool.query('UPDATE users SET role_id = $1 WHERE id = $2', [roleId, id]);
+        logger.info('User role updated', { targetUserId: id, newRoleId: roleId, byUserId: req.user.id });
+        res.json({ message: 'User role updated successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.put('/api/users/:id/deactivate', authenticate, authorize('super_admin', 'admin'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        if (req.user.id === id) {
+            return res.status(400).json({ error: 'Cannot deactivate your own account' });
+        }
+
+        await pool.query('UPDATE users SET is_active = false WHERE id = $1', [id]);
+        await pool.query('DELETE FROM sessions WHERE user_id = $1', [id]);
+        logger.info('User deactivated', { targetUserId: id, byUserId: req.user.id });
+        res.json({ message: 'User deactivated successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.delete('/api/users/:id', authenticate, authorize('super_admin'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        if (req.user.id === id) {
+            return res.status(400).json({ error: 'Cannot delete your own account' });
+        }
+
+        await pool.query('DELETE FROM users WHERE id = $1', [id]);
+        logger.info('User deleted', { targetUserId: id, byUserId: req.user.id });
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/api/audit', authenticate, authorize('super_admin', 'admin'), async (req, res, next) => {
+    try {
+        const { page = 1, limit = 50 } = req.query;
+        const safeLimit = Math.min(Math.max(parseInt(limit) || 50, 1), 100);
+        const offset = (Math.max(parseInt(page) || 1, 1) - 1) * safeLimit;
+
+        const [result, countResult] = await Promise.all([
+            pool.query(
+                `SELECT al.*, u.email as user_email FROM audit_logs al LEFT JOIN users u ON al.user_id = u.id ORDER BY al.created_at DESC LIMIT $1 OFFSET $2`,
+                [safeLimit, offset]
+            ),
+            pool.query('SELECT COUNT(*) FROM audit_logs')
+        ]);
+
+        res.json({
+            logs: result.rows,
+            pagination: {
+                total: parseInt(countResult.rows[0].count),
+                page: parseInt(page),
+                limit: safeLimit,
+                pages: Math.ceil(parseInt(countResult.rows[0].count) / safeLimit)
+            }
+        });
     } catch (error) {
         next(error);
     }
