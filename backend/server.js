@@ -989,14 +989,15 @@ app.get('*', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err.message);
-    if (err.message === 'Not allowed by CORS') {
+    const message = err?.message || err?.toString() || 'Unknown error';
+    console.error('Unhandled error:', message, err?.stack || '');
+    if (message === 'Not allowed by CORS') {
         return res.status(403).json({ error: 'Origin not allowed by CORS' });
     }
-    res.status(err.status || 500).json({
+    res.status(err?.status || 500).json({
         error: process.env.NODE_ENV === 'production'
             ? 'An unexpected error occurred'
-            : err.message
+            : message
     });
 });
 
