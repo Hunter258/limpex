@@ -17,28 +17,13 @@ class ErrorBoundary extends React.Component {
     render() {
         if (this.state.hasError) {
             return (
-                <div style={{
-                    minHeight: '100vh',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: '#f8fafb',
-                    padding: '2rem',
-                    fontFamily: "'Inter', sans-serif"
-                }}>
-                    <div style={{
-                        background: '#fff',
-                        borderRadius: '16px',
-                        padding: '3rem',
-                        maxWidth: '480px',
-                        textAlign: 'center',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-                    }}>
-                        <div style={{ fontSize: '64px', marginBottom: '1rem' }}>⚠️</div>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', color: '#1a1a1a', marginBottom: '0.5rem' }}>
+                <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8 font-body">
+                    <div className="card p-12 max-w-md text-center shadow-elevated animate-fade-in">
+                        <div className="text-7xl mb-4">⚠️</div>
+                        <h2 className="font-display text-2xl text-gray-900 mb-2">
                             Something went wrong
                         </h2>
-                        <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+                        <p className="text-gray-500 mb-6 leading-relaxed">
                             An unexpected error occurred. Please try refreshing the page.
                         </p>
                         <button
@@ -46,16 +31,7 @@ class ErrorBoundary extends React.Component {
                                 this.setState({ hasError: false, error: null });
                                 window.location.href = '/';
                             }}
-                            style={{
-                                padding: '12px 32px',
-                                background: '#00b4a0',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                fontWeight: '600',
-                                cursor: 'pointer'
-                            }}
+                            className="btn-brand px-8 py-3 text-sm font-semibold cursor-pointer"
                         >
                             Go to Homepage
                         </button>

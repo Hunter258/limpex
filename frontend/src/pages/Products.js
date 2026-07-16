@@ -72,19 +72,34 @@ const Products = () => {
         setPage(1);
     };
 
-    const getStockBadge = (quantity) => {
-        if (quantity === 0) return { label: 'Out of Stock', color: '#ef4444', bg: '#fef2f2' };
-        if (quantity < 100) return { label: 'Low Stock', color: '#f59e0b', bg: '#fffbeb' };
-        return { label: 'In Stock', color: '#10b981', bg: '#ecfdf5' };
+    const getStockBadgeClass = (quantity) => {
+        if (quantity === 0) return 'badge-danger';
+        if (quantity < 100) return 'badge-warning';
+        return 'badge-success';
     };
 
-    const getCategoryBadge = (category) => {
+    const getStockLabel = (quantity) => {
+        if (quantity === 0) return 'Out of Stock';
+        if (quantity < 100) return 'Low Stock';
+        return 'In Stock';
+    };
+
+    const getCategoryBadgeClass = (category) => {
         const map = {
-            fruits: { label: 'Fruits', color: '#8b5cf6', bg: '#f5f3ff' },
-            vegetables: { label: 'Vegetables', color: '#059669', bg: '#ecfdf5' },
-            dry_fruits: { label: 'Dry Fruits', color: '#d97706', bg: '#fffbeb' }
+            fruits: 'badge-info',
+            vegetables: 'badge-success',
+            dry_fruits: 'badge-warning'
         };
-        return map[category] || { label: category, color: '#6b7280', bg: '#f9fafb' };
+        return map[category] || 'badge';
+    };
+
+    const getCategoryLabel = (category) => {
+        const map = {
+            fruits: 'Fruits',
+            vegetables: 'Vegetables',
+            dry_fruits: 'Dry Fruits'
+        };
+        return map[category] || category;
     };
 
     const exportToExcel = () => {
@@ -104,275 +119,11 @@ const Products = () => {
         XLSX.writeFile(workbook, 'products_export.xlsx');
     };
 
-    const styles = {
-        pageContainer: {
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0f9ff 100%)',
-            padding: '0',
-        },
-        header: {
-            background: 'linear-gradient(135deg, #16a34a 0%, #059669 50%, #047857 100%)',
-            padding: '2.5rem 2rem',
-            color: 'white',
-            textAlign: 'center',
-        },
-        headerTitle: {
-            fontSize: '2rem',
-            fontWeight: '800',
-            margin: '0 0 0.5rem 0',
-            letterSpacing: '-0.025em',
-        },
-        headerSubtitle: {
-            fontSize: '1rem',
-            opacity: 0.9,
-            margin: 0,
-        },
-        controlsBar: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            padding: '1.5rem 2rem',
-            background: 'white',
-            borderBottom: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        },
-        filtersRow: {
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            flex: 1,
-        },
-        filterSelect: {
-            padding: '0.6rem 1rem',
-            borderRadius: '8px',
-            border: '1.5px solid #d1d5db',
-            fontSize: '0.875rem',
-            background: 'white',
-            color: '#374151',
-            cursor: 'pointer',
-            minWidth: '140px',
-            outline: 'none',
-            transition: 'border-color 0.2s',
-        },
-        searchInput: {
-            padding: '0.6rem 1rem',
-            borderRadius: '8px',
-            border: '1.5px solid #d1d5db',
-            fontSize: '0.875rem',
-            width: '220px',
-            outline: 'none',
-            transition: 'border-color 0.2s',
-        },
-        organicToggle: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            cursor: 'pointer',
-            padding: '0.6rem 1rem',
-            borderRadius: '8px',
-            border: '1.5px solid #d1d5db',
-            fontSize: '0.875rem',
-            color: '#374151',
-            background: 'white',
-            userSelect: 'none',
-            transition: 'all 0.2s',
-        },
-        organicToggleActive: {
-            border: '1.5px solid #16a34a',
-            background: '#ecfdf5',
-            color: '#16a34a',
-        },
-        exportBtn: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.6rem 1.25rem',
-            borderRadius: '8px',
-            border: 'none',
-            background: 'linear-gradient(135deg, #16a34a, #059669)',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
-            whiteSpace: 'nowrap',
-        },
-        resultsInfo: {
-            padding: '1rem 2rem',
-            fontSize: '0.875rem',
-            color: '#6b7280',
-            borderBottom: '1px solid #f3f4f6',
-        },
-        gridContainer: {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '1.5rem',
-            padding: '1.5rem 2rem',
-        },
-        productCard: {
-            background: 'white',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-            border: '1px solid #f3f4f6',
-            transition: 'all 0.3s ease',
-            cursor: 'pointer',
-            position: 'relative',
-        },
-        cardImageContainer: {
-            width: '100%',
-            height: '200px',
-            overflow: 'hidden',
-            position: 'relative',
-        },
-        cardImage: {
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            transition: 'transform 0.4s ease',
-        },
-        cardBadges: {
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            display: 'flex',
-            gap: '6px',
-            zIndex: 2,
-        },
-        badge: {
-            padding: '4px 10px',
-            borderRadius: '20px',
-            fontSize: '0.7rem',
-            fontWeight: '700',
-            letterSpacing: '0.03em',
-            textTransform: 'uppercase',
-        },
-        organicBadge: {
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            padding: '4px 10px',
-            borderRadius: '20px',
-            fontSize: '0.7rem',
-            fontWeight: '700',
-            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
-            color: 'white',
-            letterSpacing: '0.03em',
-            textTransform: 'uppercase',
-            boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
-        },
-        cardBody: {
-            padding: '1.25rem',
-        },
-        cardTitle: {
-            fontSize: '1.05rem',
-            fontWeight: '700',
-            color: '#111827',
-            margin: '0 0 0.5rem 0',
-            lineHeight: 1.3,
-        },
-        priceRow: {
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: '4px',
-            marginBottom: '0.75rem',
-        },
-        price: {
-            fontSize: '1.35rem',
-            fontWeight: '800',
-            color: '#16a34a',
-        },
-        unit: {
-            fontSize: '0.85rem',
-            color: '#9ca3af',
-            fontWeight: '500',
-        },
-        metaRow: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingTop: '0.75rem',
-            borderTop: '1px solid #f3f4f6',
-        },
-        origin: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '0.78rem',
-            color: '#6b7280',
-        },
-        stockBadge: {
-            padding: '3px 10px',
-            borderRadius: '20px',
-            fontSize: '0.72rem',
-            fontWeight: '700',
-        },
-        emptyState: {
-            textAlign: 'center',
-            padding: '4rem 2rem',
-            color: '#9ca3af',
-        },
-        emptyIcon: {
-            fontSize: '3rem',
-            marginBottom: '1rem',
-        },
-        pagination: {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '2rem',
-            borderTop: '1px solid #f3f4f6',
-        },
-        pageBtn: {
-            padding: '0.5rem 1rem',
-            borderRadius: '8px',
-            border: '1.5px solid #d1d5db',
-            background: 'white',
-            color: '#374151',
-            fontSize: '0.85rem',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-        },
-        pageBtnActive: {
-            background: 'linear-gradient(135deg, #16a34a, #059669)',
-            color: 'white',
-            border: '1.5px solid #16a34a',
-            boxShadow: '0 2px 8px rgba(22,163,74,0.3)',
-        },
-        pageBtnDisabled: {
-            opacity: 0.4,
-            cursor: 'not-allowed',
-        },
-        loader: {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '400px',
-            flexDirection: 'column',
-            gap: '1rem',
-            color: '#6b7280',
-        },
-        spinner: {
-            width: '40px',
-            height: '40px',
-            border: '3px solid #e5e7eb',
-            borderTop: '3px solid #16a34a',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-        },
-    };
-
     if (loading) {
         return (
-            <div style={styles.pageContainer}>
-                <div style={styles.loader}>
-                    <div style={styles.spinner}></div>
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-sky-50">
+                <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-gray-500">
+                    <div className="loading-spinner"></div>
                     <span>Loading products...</span>
                 </div>
             </div>
@@ -380,16 +131,20 @@ const Products = () => {
     }
 
     return (
-        <div style={styles.pageContainer}>
-            <div style={styles.header}>
-                <h1 style={styles.headerTitle}>{t('products') || 'Products'}</h1>
-                <p style={styles.headerSubtitle}>Fresh produce delivered to your doorstep</p>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-sky-50 font-body">
+            <div className="bg-gradient-to-r from-brand-500 to-forest-500 py-10 px-8 text-center text-white">
+                <h1 className="font-display text-3xl font-extrabold mb-2 tracking-tight">
+                    {t('products') || 'Products'}
+                </h1>
+                <p className="text-base opacity-90 m-0">
+                    Fresh produce delivered to your doorstep
+                </p>
             </div>
 
-            <div style={styles.controlsBar}>
-                <div style={styles.filtersRow}>
+            <div className="card flex flex-col md:flex-row justify-between items-center flex-wrap gap-4 px-4 md:px-8 py-5">
+                <div className="flex gap-3 flex-wrap items-center flex-1">
                     <select
-                        style={styles.filterSelect}
+                        className="input-field min-w-[140px]"
                         value={filters.category}
                         onChange={(e) => handleFilterChange('category', e.target.value)}
                     >
@@ -400,7 +155,7 @@ const Products = () => {
                     </select>
 
                     <select
-                        style={styles.filterSelect}
+                        className="input-field min-w-[140px]"
                         value={filters.type}
                         onChange={(e) => handleFilterChange('type', e.target.value)}
                     >
@@ -412,113 +167,82 @@ const Products = () => {
 
                     <input
                         type="text"
-                        style={styles.searchInput}
+                        className="input-field w-full md:w-[220px]"
                         placeholder="Search products..."
                         value={filters.search}
                         onChange={(e) => handleFilterChange('search', e.target.value)}
                     />
 
-                    <div
-                        style={{
-                            ...styles.organicToggle,
-                            ...(filters.organic ? styles.organicToggleActive : {}),
-                        }}
+                    <button
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-all border select-none ${
+                            filters.organic
+                                ? 'border-brand-500 bg-brand-50 text-brand-600'
+                                : 'border-gray-300 bg-white text-gray-600 hover:border-brand-300'
+                        }`}
                         onClick={() => handleFilterChange('organic', !filters.organic)}
                     >
-                        <span style={{ fontSize: '1rem' }}>{filters.organic ? '🌿' : '🌱'}</span>
+                        <span className="text-base">{filters.organic ? '🌿' : '🌱'}</span>
                         Organic
-                    </div>
+                    </button>
                 </div>
 
                 <button
-                    style={styles.exportBtn}
+                    className="btn-brand flex items-center gap-2 whitespace-nowrap"
                     onClick={exportToExcel}
-                    onMouseEnter={(e) => {
-                        e.target.style.transform = 'translateY(-1px)';
-                        e.target.style.boxShadow = '0 4px 12px rgba(22,163,74,0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 2px 8px rgba(22,163,74,0.3)';
-                    }}
                 >
                     📊 Export to Excel
                 </button>
             </div>
 
-            <div style={styles.resultsInfo}>
+            <div className="px-4 md:px-8 py-4 text-sm text-gray-500 border-b border-gray-100">
                 Showing {paginatedProducts.length} of {filteredProducts.length} products
                 {filters.category && ` in ${filters.category}`}
                 {filters.organic && ' (Organic only)'}
             </div>
 
             {paginatedProducts.length > 0 ? (
-                <div style={styles.gridContainer}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 md:p-8">
                     {paginatedProducts.map((product) => {
-                        const stock = getStockBadge(product.stock_quantity);
-                        const categoryBadge = getCategoryBadge(product.category_type);
                         const imageUrl = product.image_url || getProductImage(product.name, product.category_type);
 
                         return (
                             <div
                                 key={product.id}
-                                style={styles.productCard}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-4px)';
-                                    e.currentTarget.style.boxShadow =
-                                        '0 12px 24px rgba(0,0,0,0.1)';
-                                    const img = e.currentTarget.querySelector('img');
-                                    if (img) img.style.transform = 'scale(1.05)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow =
-                                        '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
-                                    const img = e.currentTarget.querySelector('img');
-                                    if (img) img.style.transform = 'scale(1)';
-                                }}
+                                className="card card-hover group cursor-pointer relative overflow-hidden"
                             >
-                                <div style={styles.cardImageContainer}>
+                                <div className="w-full h-48 overflow-hidden relative">
                                     <img
                                         src={imageUrl}
                                         alt={product.name}
-                                        style={styles.cardImage}
+                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         loading="lazy"
                                     />
-                                    <div style={styles.cardBadges}>
-                                        <span
-                                            style={{
-                                                ...styles.badge,
-                                                color: categoryBadge.color,
-                                                background: categoryBadge.bg,
-                                            }}
-                                        >
-                                            {categoryBadge.label}
+                                    <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+                                        <span className={`badge ${getCategoryBadgeClass(product.category_type)}`}>
+                                            {getCategoryLabel(product.category_type)}
                                         </span>
                                     </div>
                                     {product.is_organic && (
-                                        <div style={styles.organicBadge}>🌿 Organic</div>
+                                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[0.7rem] font-bold tracking-wide uppercase bg-gradient-to-r from-brand-500 to-green-400 text-white shadow-lg">
+                                            🌿 Organic
+                                        </div>
                                     )}
                                 </div>
 
-                                <div style={styles.cardBody}>
-                                    <h3 style={styles.cardTitle}>{product.name}</h3>
-                                    <div style={styles.priceRow}>
-                                        <span style={styles.price}>₹{product.price}</span>
-                                        <span style={styles.unit}>/{product.unit}</span>
+                                <div className="p-5">
+                                    <h3 className="text-base font-bold text-gray-900 mb-2 leading-snug">
+                                        {product.name}
+                                    </h3>
+                                    <div className="flex items-baseline gap-1 mb-3">
+                                        <span className="text-xl font-extrabold text-brand-600">₹{product.price}</span>
+                                        <span className="text-sm text-gray-400 font-medium">/{product.unit}</span>
                                     </div>
-                                    <div style={styles.metaRow}>
-                                        <span style={styles.origin}>
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                                        <span className="flex items-center gap-1 text-xs text-gray-500">
                                             🌍 {product.origin_country || 'India'}
                                         </span>
-                                        <span
-                                            style={{
-                                                ...styles.stockBadge,
-                                                color: stock.color,
-                                                background: stock.bg,
-                                            }}
-                                        >
-                                            {stock.label}
+                                        <span className={`badge ${getStockBadgeClass(product.stock_quantity)}`}>
+                                            {getStockLabel(product.stock_quantity)}
                                         </span>
                                     </div>
                                     <button
@@ -527,29 +251,7 @@ const Products = () => {
                                             addItem(product, 1);
                                             navigate('/cart');
                                         }}
-                                        style={{
-                                            width: '100%',
-                                            marginTop: '0.75rem',
-                                            padding: '10px',
-                                            background: 'linear-gradient(135deg, #16a34a, #059669)',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: '10px',
-                                            fontSize: '13px',
-                                            fontWeight: '700',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            boxShadow: '0 2px 8px rgba(22,163,74,0.2)',
-                                            fontFamily: 'Inter, sans-serif'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.target.style.transform = 'translateY(-1px)';
-                                            e.target.style.boxShadow = '0 4px 12px rgba(22,163,74,0.3)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.transform = 'translateY(0)';
-                                            e.target.style.boxShadow = '0 2px 8px rgba(22,163,74,0.2)';
-                                        }}
+                                        className="btn-brand w-full mt-3 text-[13px]"
                                     >
                                         🛒 Order Now
                                     </button>
@@ -559,24 +261,21 @@ const Products = () => {
                     })}
                 </div>
             ) : (
-                <div style={styles.emptyState}>
-                    <div style={styles.emptyIcon}>🔍</div>
-                    <h3 style={{ margin: '0 0 0.5rem 0', color: '#374151' }}>
-                        No products found
-                    </h3>
-                    <p style={{ margin: 0, fontSize: '0.9rem' }}>
-                        Try adjusting your filters or search terms
-                    </p>
+                <div className="text-center py-16 px-8 text-gray-400">
+                    <div className="text-5xl mb-4">🔍</div>
+                    <h3 className="m-0 mb-2 text-gray-600">No products found</h3>
+                    <p className="m-0 text-sm">Try adjusting your filters or search terms</p>
                 </div>
             )}
 
             {totalPages > 1 && (
-                <div style={styles.pagination}>
+                <div className="flex justify-center items-center gap-2 py-8 border-t border-gray-100">
                     <button
-                        style={{
-                            ...styles.pageBtn,
-                            ...(page === 1 ? styles.pageBtnDisabled : {}),
-                        }}
+                        className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                            page === 1
+                                ? 'border-gray-300 bg-white text-gray-600 opacity-40 cursor-not-allowed'
+                                : 'border-gray-300 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-600 cursor-pointer'
+                        }`}
                         disabled={page === 1}
                         onClick={() => setPage(page - 1)}
                     >
@@ -600,21 +299,18 @@ const Products = () => {
                             p === '...' ? (
                                 <span
                                     key={`ellipsis-${idx}`}
-                                    style={{
-                                        padding: '0.5rem 0.35rem',
-                                        color: '#9ca3af',
-                                        fontSize: '0.85rem',
-                                    }}
+                                    className="px-1 py-2 text-gray-400 text-sm"
                                 >
                                     ...
                                 </span>
                             ) : (
                                 <button
                                     key={p}
-                                    style={{
-                                        ...styles.pageBtn,
-                                        ...(p === page ? styles.pageBtnActive : {}),
-                                    }}
+                                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
+                                        p === page
+                                            ? 'bg-gradient-to-r from-brand-500 to-forest-500 text-white border-brand-500 shadow-lg'
+                                            : 'border-gray-300 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-600'
+                                    }`}
                                     onClick={() => setPage(p)}
                                 >
                                     {p}
@@ -622,10 +318,11 @@ const Products = () => {
                             )
                         )}
                     <button
-                        style={{
-                            ...styles.pageBtn,
-                            ...(page >= totalPages ? styles.pageBtnDisabled : {}),
-                        }}
+                        className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                            page >= totalPages
+                                ? 'border-gray-300 bg-white text-gray-600 opacity-40 cursor-not-allowed'
+                                : 'border-gray-300 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-600 cursor-pointer'
+                        }`}
                         disabled={page >= totalPages}
                         onClick={() => setPage(page + 1)}
                     >
@@ -633,18 +330,6 @@ const Products = () => {
                     </button>
                 </div>
             )}
-
-            <style>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                @media (max-width: 768px) {
-                    .filters-row {
-                        flex-direction: column;
-                    }
-                }
-            `}</style>
         </div>
     );
 };

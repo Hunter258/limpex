@@ -55,22 +55,23 @@ const AuditLogs = () => {
         XLSX.writeFile(wb, 'audit_logs.xlsx');
     };
 
-    if (loading) return <div className="loading">Loading audit logs...</div>;
+    if (loading) return <div className="flex items-center justify-center min-h-[400px] text-gray-500">Loading audit logs...</div>;
 
     return (
         <div>
-            <div className="page-header">
-                <h1>Audit Logs</h1>
-                <button className="btn btn-primary" onClick={exportToExcel}>Export Logs</button>
+            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h1 className="font-display text-2xl font-bold text-gray-900 m-0">Audit Logs</h1>
+                <button className="btn-brand text-sm" onClick={exportToExcel}>Export Logs</button>
             </div>
 
-            <div className="card">
-                <div className="filters">
-                    <div className="filter-group">
-                        <label>Action:</label>
+            <div className="card p-5">
+                <div className="flex flex-wrap gap-4 mb-5 pb-5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-gray-600">Action:</label>
                         <select
                             value={filters.action}
                             onChange={(e) => { setFilters({ ...filters, action: e.target.value }); setPage(1); }}
+                            className="input-field py-2 px-3 text-sm"
                         >
                             <option value="">All Actions</option>
                             <option value="USER_CREATE">User Create</option>
@@ -80,20 +81,22 @@ const AuditLogs = () => {
                             <option value="LOGOUT">Logout</option>
                         </select>
                     </div>
-                    <div className="filter-group">
-                        <label>From:</label>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-gray-600">From:</label>
                         <input
                             type="date"
                             value={filters.startDate}
                             onChange={(e) => { setFilters({ ...filters, startDate: e.target.value }); setPage(1); }}
+                            className="input-field py-2 px-3 text-sm"
                         />
                     </div>
-                    <div className="filter-group">
-                        <label>To:</label>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-gray-600">To:</label>
                         <input
                             type="date"
                             value={filters.endDate}
                             onChange={(e) => { setFilters({ ...filters, endDate: e.target.value }); setPage(1); }}
+                            className="input-field py-2 px-3 text-sm"
                         />
                     </div>
                 </div>
@@ -124,7 +127,7 @@ const AuditLogs = () => {
                                     <td>{log.ip_address}</td>
                                     <td>
                                         {log.new_values && (
-                                            <pre style={{ fontSize: '0.75rem', maxWidth: '200px', overflow: 'hidden' }}>
+                                            <pre className="text-xs max-w-[200px] overflow-hidden m-0 bg-gray-50 rounded p-1.5">
                                                 {JSON.stringify(log.new_values, null, 2)}
                                             </pre>
                                         )}
@@ -135,19 +138,21 @@ const AuditLogs = () => {
                     </table>
                 </div>
 
-                <div className="pagination">
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(page - 1)}
+                        className="btn-ghost text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         Previous
                     </button>
-                    <span style={{ padding: '0.5rem 1rem' }}>
+                    <span className="text-sm text-gray-600">
                         Page {page} of {pagination.pages || 1}
                     </span>
                     <button
                         disabled={page >= pagination.pages}
                         onClick={() => setPage(page + 1)}
+                        className="btn-ghost text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         Next
                     </button>

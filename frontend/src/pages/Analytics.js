@@ -90,29 +90,29 @@ const Analytics = () => {
         ]
     };
 
-    if (loading) return <div className="loading">Loading analytics...</div>;
+    if (loading) return <div className="flex items-center justify-center min-h-[400px] text-gray-500">Loading analytics...</div>;
 
     return (
         <div>
-            <div className="page-header">
-                <h1>Request Analytics</h1>
-                <button className="btn btn-primary" onClick={exportToExcel}>Export Analytics</button>
+            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h1 className="font-display text-2xl font-bold text-gray-900 m-0">Request Analytics</h1>
+                <button className="btn-brand text-sm" onClick={exportToExcel}>Export Analytics</button>
             </div>
 
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <h3>Total Containers</h3>
-                    <div className="value">{containers.length}</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">Total Containers</h3>
+                    <div className="text-3xl font-extrabold text-gray-900 mt-2">{containers.length}</div>
                 </div>
-                <div className="stat-card">
-                    <h3>Total Requests Tracked</h3>
-                    <div className="value">
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">Total Requests Tracked</h3>
+                    <div className="text-3xl font-extrabold text-gray-900 mt-2">
                         {containers.reduce((sum, c) => sum + parseInt(c.total_requests), 0)}
                     </div>
                 </div>
-                <div className="stat-card">
-                    <h3>Avg Response Time</h3>
-                    <div className="value">
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">Avg Response Time</h3>
+                    <div className="text-3xl font-extrabold text-gray-900 mt-2">
                         {containers.length > 0 
                             ? Math.round(containers.reduce((sum, c) => sum + c.avg_response_time, 0) / containers.length)
                             : 0}ms
@@ -120,23 +120,23 @@ const Analytics = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className="card">
-                    <h3>Response Time Over Last 20 Requests</h3>
-                    <div className="chart-container">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div className="card p-5">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Response Time Over Last 20 Requests</h3>
+                    <div className="h-[300px]">
                         <Line data={responseData} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
-                <div className="card">
-                    <h3>Requests by Container</h3>
-                    <div className="chart-container">
+                <div className="card p-5">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Requests by Container</h3>
+                    <div className="h-[300px]">
                         <Bar data={containerData} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h3>Container Tracking Details</h3>
+            <div className="card p-5 mb-6">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Container Tracking Details</h3>
                 <div className="table-container">
                     <table>
                         <thead>
@@ -151,7 +151,7 @@ const Analytics = () => {
                         <tbody>
                             {containers.map((container, index) => (
                                 <tr key={index}>
-                                    <td><code>{container.container_id}</code></td>
+                                    <td><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{container.container_id}</code></td>
                                     <td>{container.total_requests}</td>
                                     <td>{container.avg_response_time}ms</td>
                                     <td>{new Date(container.first_seen).toLocaleString()}</td>
@@ -163,8 +163,8 @@ const Analytics = () => {
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h3>Recent Request Timeline</h3>
+            <div className="card p-5">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Recent Request Timeline</h3>
                 <div className="table-container">
                     <table>
                         <thead>
@@ -189,7 +189,7 @@ const Analytics = () => {
                                         </span>
                                     </td>
                                     <td>{item.request_duration_ms}ms</td>
-                                    <td><code>{item.source_ip}</code></td>
+                                    <td><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{item.source_ip}</code></td>
                                 </tr>
                             ))}
                         </tbody>

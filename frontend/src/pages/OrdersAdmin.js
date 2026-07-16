@@ -105,107 +105,105 @@ const OrdersAdmin = () => {
 
     if (loading) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', color: '#6b7280' }}>
-                <div style={{ width: '40px', height: '40px', border: '3px solid #e5e7eb', borderTop: '3px solid #16a34a', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: '12px' }}></div>
+            <div className="flex items-center justify-center min-h-[400px] text-gray-500 gap-3">
+                <div className="loading-spinner"></div>
                 Loading orders...
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         );
     }
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.75rem', color: '#1a1a1a', margin: 0 }}>📦 Orders & Delivery</h1>
-                <button onClick={exportToExcel} style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #16a34a, #059669)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', boxShadow: '0 2px 8px rgba(22,163,74,0.3)' }}>
-                    📊 Export Excel
+            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h1 className="font-display text-2xl font-bold text-gray-900 m-0">Orders & Delivery</h1>
+                <button onClick={exportToExcel} className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white border-none rounded-lg text-xs font-semibold cursor-pointer shadow-lg shadow-green-600/30 hover:shadow-green-600/50 transition-shadow">
+                    Export Excel
                 </button>
             </div>
 
-            {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
                 {[
-                    { label: 'Total Orders', value: stats.total, color: '#374151', bg: '#f9fafb' },
-                    { label: 'Pending', value: stats.pending, color: '#92400e', bg: '#fef3c7' },
-                    { label: 'In Progress', value: stats.processing, color: '#1e40af', bg: '#dbeafe' },
-                    { label: 'Delivered', value: stats.delivered, color: '#166534', bg: '#dcfce7' },
-                    { label: 'Revenue', value: `₹${stats.revenue.toFixed(0)}`, color: '#16a34a', bg: '#f0fdf4' }
+                    { label: 'Total Orders', value: stats.total, bg: 'bg-gray-50', color: 'text-gray-700' },
+                    { label: 'Pending', value: stats.pending, bg: 'bg-amber-50', color: 'text-amber-800' },
+                    { label: 'In Progress', value: stats.processing, bg: 'bg-blue-50', color: 'text-blue-800' },
+                    { label: 'Delivered', value: stats.delivered, bg: 'bg-green-50', color: 'text-green-800' },
+                    { label: 'Revenue', value: `₹${stats.revenue.toFixed(0)}`, bg: 'bg-emerald-50', color: 'text-emerald-700' }
                 ].map((s, i) => (
-                    <div key={i} style={{ background: s.bg, borderRadius: '12px', padding: '1.25rem', textAlign: 'center' }}>
-                        <p style={{ fontSize: '12px', color: '#666', margin: '0 0 4px 0', fontWeight: '600', textTransform: 'uppercase' }}>{s.label}</p>
-                        <p style={{ fontSize: '1.5rem', fontWeight: '800', color: s.color, margin: 0 }}>{s.value}</p>
+                    <div key={i} className={`${s.bg} rounded-xl p-5 text-center`}>
+                        <p className="text-xs text-gray-500 m-0 mb-1 font-semibold uppercase">{s.label}</p>
+                        <p className={`text-2xl font-extrabold ${s.color} m-0`}>{s.value}</p>
                     </div>
                 ))}
             </div>
 
-            {/* Filter */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            <div className="flex gap-2 mb-6 flex-wrap">
                 {['all', 'pending', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'].map(s => (
-                    <button key={s} onClick={() => setFilter(s)} style={{ padding: '6px 16px', borderRadius: '20px', border: filter === s ? '2px solid #16a34a' : '1.5px solid #e5e7eb', background: filter === s ? '#dcfce7' : '#fff', color: filter === s ? '#166534' : '#6b7280', fontSize: '12px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <button key={s} onClick={() => setFilter(s)} className={`px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all border-0 ${
+                        filter === s ? 'bg-green-100 text-green-800 shadow-sm ring-2 ring-green-500/20' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    }`}>
                         {s === 'all' ? 'All' : statusLabels[s]} ({s === 'all' ? orders.length : orders.filter(o => o.status === s).length})
                     </button>
                 ))}
             </div>
 
-            {/* Orders Table */}
             {filteredOrders.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '1rem' }}>📦</div>
-                    <h3 style={{ color: '#374151', margin: '0 0 0.5rem 0' }}>No orders found</h3>
-                    <p style={{ color: '#9ca3af', margin: 0 }}>Orders will appear here when customers place them</p>
+                <div className="card p-16 text-center">
+                    <div className="text-5xl mb-4">📦</div>
+                    <h3 className="text-gray-700 m-0 mb-2">No orders found</h3>
+                    <p className="text-gray-400 m-0">Orders will appear here when customers place them</p>
                 </div>
             ) : (
-                <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div className="card overflow-hidden">
+                    <div className="table-container">
+                        <table>
                             <thead>
-                                <tr style={{ background: '#f9fafb' }}>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Order</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Customer</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Items</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Total</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Status</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Date</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' }}>Actions</th>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredOrders.map(order => {
                                     const sc = statusColors[order.status] || { bg: '#f3f4f6', text: '#6b7280' };
                                     return (
-                                        <tr key={order.id} style={{ borderBottom: '1px solid #f3f4f6', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                            <td style={{ padding: '14px 16px', fontSize: '14px', fontWeight: '700', color: '#16a34a' }}>#{order.id}</td>
-                                            <td style={{ padding: '14px 16px' }}>
-                                                <p style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', margin: 0 }}>{order.customer_name}</p>
-                                                <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 0 0' }}>{order.customer_phone || order.customer_email || '-'}</p>
+                                        <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="font-bold text-green-600">#{order.id}</td>
+                                            <td>
+                                                <p className="text-sm font-semibold text-gray-900 m-0">{order.customer_name}</p>
+                                                <p className="text-xs text-gray-400 mt-0.5 m-0">{order.customer_phone || order.customer_email || '-'}</p>
                                             </td>
-                                            <td style={{ padding: '14px 16px', fontSize: '13px', color: '#555', maxWidth: '200px' }}>
+                                            <td className="text-xs text-gray-600 max-w-[200px]">
                                                 {order.items?.map(i => i.product_name).join(', ') || '-'}
                                             </td>
-                                            <td style={{ padding: '14px 16px', fontSize: '15px', fontWeight: '800', color: '#1a1a1a' }}>₹{order.total_amount}</td>
-                                            <td style={{ padding: '14px 16px' }}>
-                                                <span style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', background: sc.bg, color: sc.text }}>
+                                            <td className="text-sm font-extrabold text-gray-900">₹{order.total_amount}</td>
+                                            <td>
+                                                <span style={{ background: sc.bg, color: sc.text }} className="inline-block px-3 py-1 rounded-full text-[11px] font-bold">
                                                     {statusLabels[order.status] || order.status}
                                                 </span>
                                             </td>
-                                            <td style={{ padding: '14px 16px', fontSize: '13px', color: '#666' }}>
+                                            <td className="text-xs text-gray-500">
                                                 {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                                             </td>
-                                            <td style={{ padding: '14px 16px' }}>
-                                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                            <td>
+                                                <div className="flex gap-1 flex-wrap items-center">
                                                     {order.status !== 'delivered' && order.status !== 'cancelled' && (
                                                         <select
                                                             value={order.status}
                                                             onChange={(e) => updateStatus(order.id, e.target.value)}
                                                             disabled={updatingId === order.id}
-                                                            style={{ padding: '4px 8px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', background: '#fff' }}
+                                                            className="input-field py-1 px-2 text-[11px] w-auto"
                                                         >
                                                             {['pending', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'].map(s => (
                                                                 <option key={s} value={s}>{statusLabels[s]}</option>
                                                             ))}
                                                         </select>
                                                     )}
-                                                    <button onClick={() => deleteOrder(order.id)} style={{ padding: '4px 8px', background: '#fef2f2', color: '#ef4444', border: 'none', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600' }}>
+                                                    <button onClick={() => deleteOrder(order.id)} className="px-2 py-1 bg-red-50 text-red-500 border-none rounded text-[11px] cursor-pointer font-semibold hover:bg-red-100 transition-colors">
                                                         Delete
                                                     </button>
                                                 </div>

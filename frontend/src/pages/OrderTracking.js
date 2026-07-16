@@ -52,92 +52,100 @@ const OrderTracking = () => {
     const currentStepIndex = orderData ? Math.max(0, statusSteps.indexOf(orderData.order?.status)) : -1;
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f8fafb' }}>
-            <div style={{ background: 'linear-gradient(135deg, #00b4a0, #009688)', padding: '2.5rem 2rem', color: 'white', textAlign: 'center' }}>
-                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2rem', fontWeight: '800', margin: '0 0 0.5rem 0' }}>Track Your Order</h1>
-                <p style={{ fontSize: '1rem', opacity: 0.9, margin: 0 }}>Enter your order number to track delivery status</p>
+        <div className="min-h-screen bg-gray-50">
+            <div className="bg-hero-gradient py-10 px-8 text-white text-center">
+                <h1 className="font-display text-3xl font-extrabold mb-2">Track Your Order</h1>
+                <p className="text-base opacity-90 m-0">Enter your order number to track delivery status</p>
             </div>
 
-            <div style={{ maxWidth: '700px', margin: '0 auto', padding: '2rem' }}>
-                <div style={{ background: '#fff', borderRadius: '16px', padding: '2rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '2rem', border: '1px solid #f0f0f0' }}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="max-w-[700px] mx-auto p-8">
+                <div className="card p-8 mb-8">
+                    <div className="flex gap-2.5">
                         <input
                             type="text"
                             placeholder="Enter Order Number (e.g., 1)"
                             value={searchId}
                             onChange={e => setSearchId(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && trackOrder(searchId)}
-                            style={{ flex: 1, padding: '14px 16px', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', outline: 'none', fontFamily: 'Inter, sans-serif', transition: 'border-color 0.2s' }}
+                            className="input-field flex-1"
                             aria-label="Order number"
                         />
                         <button onClick={() => trackOrder(searchId)} disabled={loading}
-                            style={{ padding: '14px 28px', background: 'linear-gradient(135deg, #00b4a0, #009688)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(0,180,160,0.3)', whiteSpace: 'nowrap' }}>
+                            className="btn-brand whitespace-nowrap px-7 py-3.5 text-sm font-bold disabled:cursor-not-allowed">
                             {loading ? '...' : 'Track'}
                         </button>
                     </div>
                 </div>
 
                 {error && (
-                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '1.5rem', textAlign: 'center', marginBottom: '2rem' }} role="alert">
-                        <p style={{ color: '#dc2626', fontSize: '15px' }}>{error}</p>
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center mb-8" role="alert">
+                        <p className="text-red-600 text-sm">{error}</p>
                     </div>
                 )}
 
                 {orderData && orderData.order && (
                     <div>
-                        <div style={{ background: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '1.5rem', border: '1px solid #f0f0f0' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div className="card p-6 mb-6">
+                            <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                                 <div>
-                                    <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px', fontWeight: '700', color: '#1a1a1a', margin: 0 }}>Order #{orderData.order.id}</h3>
-                                    <p style={{ fontSize: '13px', color: '#888', margin: '4px 0 0 0' }}>
+                                    <h3 className="font-display text-xl font-bold text-gray-900 m-0">Order #{orderData.order.id}</h3>
+                                    <p className="text-xs text-gray-400 mt-1 m-0">
                                         Placed on {new Date(orderData.order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                 </div>
-                                <span style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: '700',
-                                    background: orderData.order.status === 'delivered' ? '#dcfce7' : orderData.order.status === 'cancelled' ? '#fee2e2' : '#dbeafe',
-                                    color: orderData.order.status === 'delivered' ? '#166534' : orderData.order.status === 'cancelled' ? '#991b1b' : '#1e40af' }}>
+                                <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold ${
+                                    orderData.order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                    orderData.order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                    'bg-blue-100 text-blue-800'
+                                }`}>
                                     {statusLabels[orderData.order.status] || orderData.order.status}
                                 </span>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', fontSize: '14px' }}>
+                            <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 text-sm">
                                 <div>
-                                    <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Customer</p>
-                                    <p style={{ color: '#1a1a1a', fontWeight: '600', margin: 0 }}>{orderData.order.customer_name}</p>
+                                    <p className="text-gray-400 m-0 mb-0.5 text-xs uppercase font-semibold">Customer</p>
+                                    <p className="text-gray-900 font-semibold m-0">{orderData.order.customer_name}</p>
                                 </div>
                                 <div>
-                                    <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Total</p>
-                                    <p style={{ color: '#00b4a0', fontWeight: '800', margin: 0, fontSize: '18px' }}>&#8377;{orderData.order.total_amount}</p>
+                                    <p className="text-gray-400 m-0 mb-0.5 text-xs uppercase font-semibold">Total</p>
+                                    <p className="text-brand-500 font-extrabold m-0 text-lg">&#8377;{orderData.order.total_amount}</p>
                                 </div>
                                 <div>
-                                    <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Payment</p>
-                                    <p style={{ color: '#1a1a1a', fontWeight: '600', margin: 0, textTransform: 'capitalize' }}>{orderData.order.payment_method === 'cod' ? 'Cash on Delivery' : orderData.order.payment_method === 'upi' ? 'UPI Payment' : 'Card Payment'}</p>
+                                    <p className="text-gray-400 m-0 mb-0.5 text-xs uppercase font-semibold">Payment</p>
+                                    <p className="text-gray-900 font-semibold m-0 capitalize">{orderData.order.payment_method === 'cod' ? 'Cash on Delivery' : orderData.order.payment_method === 'upi' ? 'UPI Payment' : 'Card Payment'}</p>
                                 </div>
                                 <div>
-                                    <p style={{ color: '#888', margin: '0 0 2px 0', fontSize: '12px', textTransform: 'uppercase', fontWeight: '600' }}>Delivery Address</p>
-                                    <p style={{ color: '#1a1a1a', fontWeight: '600', margin: 0, fontSize: '13px' }}>{orderData.order.delivery_address}</p>
+                                    <p className="text-gray-400 m-0 mb-0.5 text-xs uppercase font-semibold">Delivery Address</p>
+                                    <p className="text-gray-900 font-semibold m-0 text-xs">{orderData.order.delivery_address}</p>
                                 </div>
                             </div>
                             {orderData.order.delivery_estimate && (
-                                <div style={{ marginTop: '1rem', padding: '12px 16px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-                                    <p style={{ fontSize: '13px', fontWeight: '700', color: '#166534', margin: 0 }}>Estimated Delivery: {orderData.order.delivery_estimate}</p>
+                                <div className="mt-4 px-4 py-3 bg-green-50 rounded-[10px] border border-green-200">
+                                    <p className="text-xs font-bold text-green-800 m-0">Estimated Delivery: {orderData.order.delivery_estimate}</p>
                                 </div>
                             )}
                         </div>
 
                         {currentStepIndex >= 0 && (
-                            <div style={{ background: '#fff', borderRadius: '16px', padding: '2rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '1.5rem', border: '1px solid #f0f0f0' }}>
-                                <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '1.5rem' }}>Delivery Progress</h4>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', padding: '0 10px' }}>
-                                    <div style={{ position: 'absolute', top: '18px', left: '30px', right: '30px', height: '3px', background: '#e5e7eb', zIndex: 0 }}>
-                                        <div style={{ height: '100%', background: '#00b4a0', width: `${Math.max(0, (currentStepIndex / (statusSteps.length - 1)) * 100)}%`, transition: 'width 0.5s ease', borderRadius: '2px' }}></div>
+                            <div className="card p-8 mb-6">
+                                <h4 className="font-display text-base font-bold text-gray-900 mb-6">Delivery Progress</h4>
+                                <div className="flex justify-between relative px-2.5">
+                                    <div className="absolute top-[18px] left-[30px] right-[30px] h-[3px] bg-gray-200 z-0">
+                                        <div className="h-full bg-brand-500 rounded-sm transition-all duration-500" style={{ width: `${Math.max(0, (currentStepIndex / (statusSteps.length - 1)) * 100)}%` }}></div>
                                     </div>
                                     {statusSteps.map((step, i) => (
-                                        <div key={step} style={{ textAlign: 'center', zIndex: 1, flex: 1 }}>
-                                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: i <= currentStepIndex ? '#00b4a0' : '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: '14px', fontWeight: '700', color: i <= currentStepIndex ? '#fff' : '#9ca3af', transition: 'all 0.3s ease', boxShadow: i <= currentStepIndex ? '0 2px 8px rgba(0,180,160,0.3)' : 'none' }}>
+                                        <div key={step} className="text-center z-1 flex-1">
+                                            <div className={`w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold transition-all duration-300 ${
+                                                i <= currentStepIndex
+                                                    ? 'bg-brand-500 text-white shadow-[0_2px_8px_rgba(0,180,160,0.3)]'
+                                                    : 'bg-gray-200 text-gray-400'
+                                            }`}>
                                                 {i <= currentStepIndex ? '\u2713' : i + 1}
                                             </div>
-                                            <span style={{ fontSize: '10px', fontWeight: '600', color: i <= currentStepIndex ? '#00b4a0' : '#9ca3af', lineHeight: '1.2', display: 'block' }}>
+                                            <span className={`text-[10px] font-semibold leading-tight block ${
+                                                i <= currentStepIndex ? 'text-brand-500' : 'text-gray-400'
+                                            }`}>
                                                 {statusLabels[step]}
                                             </span>
                                         </div>
@@ -147,19 +155,21 @@ const OrderTracking = () => {
                         )}
 
                         {orderData.tracking && orderData.tracking.length > 0 && (
-                            <div style={{ background: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '1.5rem', border: '1px solid #f0f0f0' }}>
-                                <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '1rem' }}>Tracking History</h4>
+                            <div className="card p-6 mb-6">
+                                <h4 className="font-display text-base font-bold text-gray-900 mb-4">Tracking History</h4>
                                 {orderData.tracking.map((t, i) => (
-                                    <div key={t.id} style={{ display: 'flex', gap: '12px', padding: '12px 0', borderBottom: i < orderData.tracking.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: i === 0 ? '#dcfce7' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: i === 0 ? '#166534' : '#9ca3af', flexShrink: 0 }}>
+                                    <div key={t.id} className={`flex gap-3 py-3 ${i < orderData.tracking.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                            i === 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'
+                                        }`}>
                                             {statusIcons[t.status] || i + 1}
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', margin: 0, textTransform: 'capitalize' }}>{statusLabels[t.status] || t.status}</p>
-                                            {t.location && <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 0 0' }}>{t.location}</p>}
-                                            {t.notes && <p style={{ fontSize: '12px', color: '#666', margin: '4px 0 0 0', fontStyle: 'italic' }}>{t.notes}</p>}
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-gray-900 m-0 capitalize">{statusLabels[t.status] || t.status}</p>
+                                            {t.location && <p className="text-xs text-gray-400 mt-0.5 m-0">{t.location}</p>}
+                                            {t.notes && <p className="text-xs text-gray-500 mt-1 m-0 italic">{t.notes}</p>}
                                         </div>
-                                        <span style={{ fontSize: '11px', color: '#999', whiteSpace: 'nowrap' }}>
+                                        <span className="text-[11px] text-gray-400 whitespace-nowrap">
                                             {new Date(t.created_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
@@ -168,22 +178,22 @@ const OrderTracking = () => {
                         )}
 
                         {orderData.items && orderData.items.length > 0 && (
-                            <div style={{ background: '#fff', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #f0f0f0' }}>
-                                <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: '16px', fontWeight: '700', color: '#1a1a1a', marginBottom: '1rem' }}>Order Items</h4>
+                            <div className="card p-6">
+                                <h4 className="font-display text-base font-bold text-gray-900 mb-4">Order Items</h4>
                                 {orderData.items.map((item, i) => (
-                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < orderData.items.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                                    <div key={i} className={`flex justify-between py-2.5 ${i < orderData.items.length - 1 ? 'border-b border-gray-100' : ''}`}>
                                         <div>
-                                            <p style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', margin: 0 }}>{item.product_name}</p>
-                                            <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 0 0' }}>{item.quantity} {item.unit} x &#8377;{item.price}</p>
+                                            <p className="text-sm font-semibold text-gray-900 m-0">{item.product_name}</p>
+                                            <p className="text-xs text-gray-400 mt-0.5 m-0">{item.quantity} {item.unit} x &#8377;{item.price}</p>
                                         </div>
-                                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#00b4a0' }}>&#8377;{(item.quantity * item.price).toFixed(0)}</span>
+                                        <span className="text-sm font-bold text-brand-500">&#8377;{(item.quantity * item.price).toFixed(0)}</span>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-                            <button onClick={() => navigate('/products')} style={{ padding: '12px 32px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '25px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                        <div className="text-center mt-8">
+                            <button onClick={() => navigate('/products')} className="px-8 py-3 bg-gray-100 text-gray-700 border-none rounded-full text-sm font-semibold cursor-pointer hover:bg-gray-200 transition-colors">
                                 Continue Shopping
                             </button>
                         </div>

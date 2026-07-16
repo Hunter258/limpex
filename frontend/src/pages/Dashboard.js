@@ -48,7 +48,7 @@ const Dashboard = () => {
         }
     };
 
-    if (loading) return <div className="loading">Loading...</div>;
+    if (loading) return <div className="flex items-center justify-center min-h-[400px] text-gray-500">Loading...</div>;
 
     const requestData = {
         labels: stats?.userActivity?.map(d => new Date(d.day).toLocaleDateString()) || [],
@@ -90,10 +90,10 @@ const Dashboard = () => {
 
     return (
         <div>
-            <div className="page-header">
-                <h1>{t('dashTitle')}</h1>
-                <div className="filter-group">
-                    <select value={period} onChange={(e) => setPeriod(e.target.value)}>
+            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h1 className="font-display text-2xl font-bold text-gray-900 m-0">{t('dashTitle')}</h1>
+                <div>
+                    <select value={period} onChange={(e) => setPeriod(e.target.value)} className="input-field py-2 px-3 text-sm">
                         <option value="24h">Last 24 Hours</option>
                         <option value="7d">Last 7 Days</option>
                         <option value="30d">Last 30 Days</option>
@@ -101,51 +101,51 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <h3>{t('dashTotalRequests')}</h3>
-                    <div className="value">{stats?.stats?.total_requests || 0}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">{t('dashTotalRequests')}</h3>
+                    <div className="text-3xl font-extrabold text-gray-900 mt-2">{stats?.stats?.total_requests || 0}</div>
                 </div>
-                <div className="stat-card">
-                    <h3>{t('dashActiveUsers')}</h3>
-                    <div className="value">{stats?.stats?.unique_users || 0}</div>
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">{t('dashActiveUsers')}</h3>
+                    <div className="text-3xl font-extrabold text-gray-900 mt-2">{stats?.stats?.unique_users || 0}</div>
                 </div>
-                <div className="stat-card">
-                    <h3>Avg Response</h3>
-                    <div className="value">{stats?.stats?.avg_response_time || 0}ms</div>
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">Avg Response</h3>
+                    <div className="text-3xl font-extrabold text-gray-900 mt-2">{stats?.stats?.avg_response_time || 0}ms</div>
                 </div>
-                <div className="stat-card">
-                    <h3>Errors</h3>
-                    <div className="value" style={{ color: '#ef4444' }}>
+                <div className="card p-5">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide m-0">Errors</h3>
+                    <div className="text-3xl font-extrabold text-red-500 mt-2">
                         {stats?.stats?.error_count || 0}
                     </div>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-                <div className="card">
-                    <h3>Request Traffic</h3>
-                    <div className="chart-container">
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 mb-6">
+                <div className="card p-5">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Request Traffic</h3>
+                    <div className="h-[300px]">
                         <Line data={requestData} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
-                <div className="card">
-                    <h3>Traffic Sources</h3>
-                    <div className="chart-container">
+                <div className="card p-5">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Traffic Sources</h3>
+                    <div className="h-[300px]">
                         <Doughnut data={containerData} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h3>{t('dashRecentActivity')}</h3>
-                <div className="chart-container">
+            <div className="card p-5 mb-6">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">{t('dashRecentActivity')}</h3>
+                <div className="h-[300px]">
                     <Line data={userActivityData} options={{ responsive: true, maintainAspectRatio: false }} />
                 </div>
             </div>
 
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h3>Top Endpoints</h3>
+            <div className="card p-5">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 m-0">Top Endpoints</h3>
                 <div className="table-container">
                     <table>
                         <thead>

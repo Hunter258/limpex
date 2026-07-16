@@ -3,60 +3,20 @@ import { Link } from 'react-router-dom';
 
 const NotFound = () => {
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#f8fafb',
-            padding: '2rem',
-            fontFamily: "'Inter', sans-serif"
-        }}>
-            <div style={{
-                background: '#fff',
-                borderRadius: '16px',
-                padding: '3rem',
-                maxWidth: '480px',
-                textAlign: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-            }}>
-                <div style={{ fontSize: '80px', marginBottom: '1rem', fontWeight: '900', color: '#00b4a0' }}>404</div>
-                <h1 style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: '28px',
-                    color: '#1a1a1a',
-                    marginBottom: '0.5rem'
-                }}>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8 font-body">
+            <div className="card p-12 max-w-md text-center shadow-elevated animate-fade-in">
+                <div className="text-[80px] font-display font-black text-brand-500 mb-4 leading-none">404</div>
+                <h1 className="font-display text-[28px] text-gray-900 mb-2">
                     Page Not Found
                 </h1>
-                <p style={{ color: '#666', marginBottom: '2rem', lineHeight: '1.6' }}>
+                <p className="text-gray-500 mb-8 leading-relaxed">
                     The page you are looking for does not exist or has been moved.
                 </p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link to="/" style={{
-                        padding: '12px 28px',
-                        background: '#00b4a0',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        textDecoration: 'none',
-                        display: 'inline-block'
-                    }}>
+                <div className="flex gap-3 justify-center flex-wrap">
+                    <Link to="/" className="btn-brand px-7 py-3 text-sm font-semibold no-underline inline-block">
                         Go to Homepage
                     </Link>
-                    <Link to="/products" style={{
-                        padding: '12px 28px',
-                        background: '#f3f4f6',
-                        color: '#374151',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        textDecoration: 'none',
-                        display: 'inline-block'
-                    }}>
+                    <Link to="/products" className="btn-ghost px-7 py-3 text-sm font-semibold no-underline inline-block bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                         Browse Products
                     </Link>
                 </div>

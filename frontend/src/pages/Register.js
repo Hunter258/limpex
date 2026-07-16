@@ -27,10 +27,10 @@ const Register = () => {
         if (/[0-9]/.test(pwd)) score++;
         if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-        if (score <= 1) return { level: 1, text: 'Weak', color: '#dc2626' };
-        if (score <= 2) return { level: 2, text: 'Fair', color: '#f59e0b' };
-        if (score <= 3) return { level: 3, text: 'Good', color: '#00b4a0' };
-        return { level: 4, text: 'Strong', color: '#16a34a' };
+        if (score <= 1) return { level: 1, text: 'Weak', color: 'bg-red-600', textColor: 'text-red-600' };
+        if (score <= 2) return { level: 2, text: 'Fair', color: 'bg-amber-500', textColor: 'text-amber-500' };
+        if (score <= 3) return { level: 3, text: 'Good', color: 'bg-brand-500', textColor: 'text-brand-500' };
+        return { level: 4, text: 'Strong', color: 'bg-green-600', textColor: 'text-green-600' };
     };
 
     const handleSubmit = async (e) => {
@@ -68,85 +68,87 @@ const Register = () => {
     const strength = getPasswordStrength(formData.password);
 
     return (
-        <div className="auth-container">
-            <div className="language-switcher-top">
-                <button className={`lang-btn ${language === 'en' ? 'active' : ''}`} onClick={() => changeLanguage('en')}>English</button>
-                <button className={`lang-btn ${language === 'hi' ? 'active' : ''}`} onClick={() => changeLanguage('hi')}>हिन्दी</button>
-                <button className={`lang-btn ${language === 'mr' ? 'active' : ''}`} onClick={() => changeLanguage('mr')}>मराठी</button>
+        <div className="min-h-screen bg-dark-gradient flex items-center justify-center p-8 relative">
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 flex gap-2">
+                <button className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${language === 'en' ? 'bg-brand-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`} onClick={() => changeLanguage('en')}>English</button>
+                <button className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${language === 'hi' ? 'bg-brand-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`} onClick={() => changeLanguage('hi')}>हिन्दी</button>
+                <button className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${language === 'mr' ? 'bg-brand-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`} onClick={() => changeLanguage('mr')}>मराठी</button>
             </div>
 
-            <div className="auth-card">
-                <div className="auth-logo">Limpex</div>
-                <h1>{t('authRegister')}</h1>
-                <p className="subtitle">{t('authSubtitle')}</p>
+            <div className="card-glass w-full max-w-md p-10 rounded-2xl">
+                <div className="text-center mb-6">
+                    <div className="font-display text-3xl font-extrabold text-brand-500 mb-2">Limpex</div>
+                    <h1 className="font-display text-xl font-bold text-gray-900 mb-1">{t('authRegister')}</h1>
+                    <p className="text-sm text-gray-500">{t('authSubtitle')}</p>
+                </div>
 
-                {error && <div className="error-message" role="alert" aria-live="polite">{error}</div>}
+                {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm text-center mb-6" role="alert" aria-live="polite">{error}</div>}
 
                 <form onSubmit={handleSubmit} noValidate>
-                    <div className="form-group">
-                        <label htmlFor="reg-first">{t('authFirstName')} *</label>
+                    <div className="mb-4">
+                        <label htmlFor="reg-first" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('authFirstName')} *</label>
                         <input id="reg-first" type="text" name="firstName" value={formData.firstName} onChange={handleChange}
-                            placeholder={t('authFirstName')} autoComplete="given-name" disabled={loading} required />
+                            placeholder={t('authFirstName')} autoComplete="given-name" disabled={loading} required className="input-field" />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="reg-last">{t('authLastName')}</label>
+                    <div className="mb-4">
+                        <label htmlFor="reg-last" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('authLastName')}</label>
                         <input id="reg-last" type="text" name="lastName" value={formData.lastName} onChange={handleChange}
-                            placeholder={t('authLastName')} autoComplete="family-name" disabled={loading} />
+                            placeholder={t('authLastName')} autoComplete="family-name" disabled={loading} className="input-field" />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="reg-email">{t('authEmail')}</label>
+                    <div className="mb-4">
+                        <label htmlFor="reg-email" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('authEmail')}</label>
                         <input id="reg-email" type="email" name="email" value={formData.email} onChange={handleChange}
-                            required placeholder="you@example.com" autoComplete="email" disabled={loading} />
+                            required placeholder="you@example.com" autoComplete="email" disabled={loading} className="input-field" />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="reg-pass">{t('authPassword')}</label>
-                        <div style={{ position: 'relative' }}>
+                    <div className="mb-4">
+                        <label htmlFor="reg-pass" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('authPassword')}</label>
+                        <div className="relative">
                             <input id="reg-pass" type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange}
-                                required placeholder="Min 8 characters" autoComplete="new-password" disabled={loading} style={{ paddingRight: '45px' }} />
+                                required placeholder="Min 8 characters" autoComplete="new-password" disabled={loading} className="input-field pr-12" />
                             <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#9ca3af', padding: '4px' }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-lg text-gray-400 p-1 hover:text-gray-600 transition-colors"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'} tabIndex={-1}>
                                 {showPassword ? '👁️' : '👁️‍🗨️'}
                             </button>
                         </div>
                         {formData.password && (
-                            <div style={{ marginTop: '6px' }}>
-                                <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                            <div className="mt-1.5">
+                                <div className="flex gap-1 mb-1">
                                     {[1, 2, 3, 4].map(i => (
-                                        <div key={i} style={{ flex: 1, height: '4px', borderRadius: '2px', background: i <= strength.level ? strength.color : '#e5e7eb', transition: 'background 0.2s' }} />
+                                        <div key={i} className={`flex-1 h-1 rounded-sm transition-all duration-200 ${i <= strength.level ? strength.color : 'bg-gray-200'}`} />
                                     ))}
                                 </div>
-                                <span style={{ fontSize: '11px', color: strength.color, fontWeight: '600' }}>{strength.text}</span>
+                                <span className={`text-[11px] font-semibold ${strength.textColor}`}>{strength.text}</span>
                             </div>
                         )}
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="reg-confirm">{t('authConfirmPassword')}</label>
+                    <div className="mb-6">
+                        <label htmlFor="reg-confirm" className="block text-sm font-semibold text-gray-700 mb-1.5">{t('authConfirmPassword')}</label>
                         <input id="reg-confirm" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-                            required placeholder="••••••••" autoComplete="new-password" disabled={loading} />
+                            required placeholder="••••••••" autoComplete="new-password" disabled={loading} className="input-field" />
                         {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                            <span style={{ fontSize: '11px', color: '#dc2626' }}>Passwords do not match</span>
+                            <span className="text-[11px] text-red-600">Passwords do not match</span>
                         )}
                     </div>
 
-                    <button type="submit" className="btn btn-primary-full" disabled={loading}>
+                    <button type="submit" className="btn-brand w-full py-3.5 text-sm font-bold disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>
                         {loading ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                <span className="spinner-sm"></span> Creating account...
+                            <span className="inline-flex items-center gap-2">
+                                <span className="loading-spinner"></span> Creating account...
                             </span>
                         ) : t('authRegisterButton')}
                     </button>
                 </form>
 
-                <p className="auth-link">
-                    {t('authHasAccount')} <Link to="/login">{t('authLoginHere')}</Link>
+                <p className="text-center text-sm text-gray-500 mt-6">
+                    {t('authHasAccount')} <Link to="/login" className="text-brand-500 font-semibold hover:text-brand-600 transition-colors">{t('authLoginHere')}</Link>
                 </p>
-                <p className="auth-link" style={{ marginTop: '0.5rem' }}>
-                    <Link to="/">{t('authBackHome')}</Link>
+                <p className="text-center text-sm mt-2">
+                    <Link to="/" className="text-brand-500 font-semibold hover:text-brand-600 transition-colors">{t('authBackHome')}</Link>
                 </p>
             </div>
         </div>

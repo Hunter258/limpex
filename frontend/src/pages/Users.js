@@ -72,25 +72,24 @@ const Users = () => {
         XLSX.writeFile(wb, 'users.xlsx');
     };
 
-    if (loading) return <div className="loading">Loading users...</div>;
+    if (loading) return <div className="flex items-center justify-center min-h-[400px] text-gray-500">Loading users...</div>;
 
     return (
         <div>
-            <div className="page-header">
-                <h1>User Management</h1>
-                <button className="btn btn-primary" onClick={exportToExcel}>Export Users</button>
+            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h1 className="font-display text-2xl font-bold text-gray-900 m-0">User Management</h1>
+                <button className="btn-brand text-sm" onClick={exportToExcel}>Export Users</button>
             </div>
 
-            <div className="card">
-                <div className="filters">
-                    <div className="filter-group">
-                        <input
-                            type="text"
-                            placeholder="Search users..."
-                            value={search}
-                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                        />
-                    </div>
+            <div className="card p-5">
+                <div className="mb-5">
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        className="input-field max-w-sm"
+                    />
                 </div>
 
                 <div className="table-container">
@@ -118,30 +117,31 @@ const Users = () => {
                                     </td>
                                     <td>{u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never'}</td>
                                     <td>
-                                        {user.role === 'super_admin' && (
-                                            <select
-                                                value={users.find(usr => usr.id === u.id)?.role_name}
-                                                onChange={(e) => {
-                                                    const roleMap = { super_admin: 1, admin: 2, editor: 3, user: 4 };
-                                                    handleRoleChange(u.id, roleMap[e.target.value]);
-                                                }}
-                                                style={{ marginRight: '0.5rem', padding: '0.25rem' }}
-                                            >
-                                                <option value="user">User</option>
-                                                <option value="editor">Editor</option>
-                                                <option value="admin">Admin</option>
-                                                <option value="super_admin">Super Admin</option>
-                                            </select>
-                                        )}
-                                        {u.is_active && u.id !== user.id && (
-                                            <button
-                                                className="btn btn-danger"
-                                                onClick={() => handleDeactivate(u.id)}
-                                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-                                            >
-                                                Deactivate
-                                            </button>
-                                        )}
+                                        <div className="flex items-center gap-2">
+                                            {user.role === 'super_admin' && (
+                                                <select
+                                                    value={users.find(usr => usr.id === u.id)?.role_name}
+                                                    onChange={(e) => {
+                                                        const roleMap = { super_admin: 1, admin: 2, editor: 3, user: 4 };
+                                                        handleRoleChange(u.id, roleMap[e.target.value]);
+                                                    }}
+                                                    className="input-field py-1 px-2 text-xs"
+                                                >
+                                                    <option value="user">User</option>
+                                                    <option value="editor">Editor</option>
+                                                    <option value="admin">Admin</option>
+                                                    <option value="super_admin">Super Admin</option>
+                                                </select>
+                                            )}
+                                            {u.is_active && u.id !== user.id && (
+                                                <button
+                                                    className="btn-danger px-2 py-1 text-xs"
+                                                    onClick={() => handleDeactivate(u.id)}
+                                                >
+                                                    Deactivate
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -149,19 +149,21 @@ const Users = () => {
                     </table>
                 </div>
 
-                <div className="pagination">
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(page - 1)}
+                        className="btn-ghost text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         Previous
                     </button>
-                    <span style={{ padding: '0.5rem 1rem' }}>
+                    <span className="text-sm text-gray-600">
                         Page {page} of {pagination.pages || 1}
                     </span>
                     <button
                         disabled={page >= pagination.pages}
                         onClick={() => setPage(page + 1)}
+                        className="btn-ghost text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         Next
                     </button>
