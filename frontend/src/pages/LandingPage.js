@@ -324,6 +324,7 @@ const LandingPage = () => {
                         >
                             {item.label}
                         </a>
+                        )
                     ))}
                     <Link
                         to="/login"
