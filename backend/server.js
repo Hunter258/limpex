@@ -286,7 +286,7 @@ const seedCategoriesAndProducts = async () => {
             [catMap['Exotic Fruits'], 'Mangosteen', 'Queen of fruits from Thailand', 600, 'kg', 80, 'Thailand', true, 'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=400'],
             [catMap['Exotic Fruits'], 'Passion Fruit', 'Tropical passion fruit from Brazil', 300, 'kg', 120, 'Brazil', true, 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400'],
             [catMap['Exotic Fruits'], 'Lychee (Rose)', 'Fragrant rose lychees from Bihar', 250, 'kg', 200, 'Bihar', true, 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400'],
-            [catMap['Exotic Fruits'], 'Jackfruit (Varikka)', 'Crisp Varikka jackfruit from Kerala', 80, 'kg', 150, 'Kerala', false, 'https://images.unsplash.com/photo-1559181567-c3190ca96599?w=400'],
+            [catMap['Exotic Fruits'], 'Jackfruit (Varikka)', 'Crisp Varikka jackfruit from Kerala', 80, 'kg', 150, 'Kerala', false, 'https://images.unsplash.com/photo-1563114773-84221bd62daa?w=400'],
             [catMap['Exotic Fruits'], 'Sapodilla (Chikoo)', 'Sweet grainy chikoo', 150, 'kg', 200, 'Maharashtra', true, 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400'],
             [catMap['Exotic Fruits'], 'Star Fruit (Carambola)', 'Beautiful star-shaped fruit from Goa', 200, 'kg', 100, 'Goa', true, 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
             [catMap['Exotic Fruits'], 'Mulberry', 'Sweet dark mulberries from Himachal', 350, 'kg', 80, 'Himachal', true, 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400'],
@@ -356,6 +356,92 @@ const seedCategoriesAndProducts = async () => {
             }
         }
         console.log(`Seeded ${seeded} of ${products.length} products`);
+
+        console.log('Updating product image URLs...');
+        const imageUpdates = [
+            ['Alphonso Mango (Hapus)', 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400'],
+            ['Banana (Robusta)', 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400'],
+            ['Papaya (Red Lady)', 'https://images.unsplash.com/photo-1560008581-09826d1de69e?w=400'],
+            ['Guava (Allahabad)', 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400'],
+            ['Pomegranate (Bhagwa)', 'https://images.unsplash.com/photo-1541344999736-83eca272f6fc?w=400'],
+            ['Sweet Lime (Mosambi)', 'https://images.unsplash.com/photo-1547514701-42782101795e?w=400'],
+            ['Watermelon (Sharbati)', 'https://images.unsplash.com/photo-1563114773-84221bd62daa?w=400'],
+            ['Grapes (Thompson)', 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=400'],
+            ['Pineapple (Queen)', 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400'],
+            ['Custard Apple (Sitaphal)', 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400'],
+            ['Apple (Shimla)', 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400'],
+            ['Kiwi (Zespri)', 'https://images.unsplash.com/photo-1482012792084-a0c3725f289f?w=400'],
+            ['Avocado (Hass)', 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400'],
+            ['Dragon Fruit (Red)', 'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=400'],
+            ['Cherry (NZ Lapin)', 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400'],
+            ['Blueberry (Organic)', 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400'],
+            ['Strawberry (Camarosa)', 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400'],
+            ['Plum (Red)', 'https://images.unsplash.com/photo-1502741224143-90386d7f8c82?w=400'],
+            ['Fig (Anjeer)', 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400'],
+            ['Pears (Packham)', 'https://images.unsplash.com/photo-1514756331096-242fdeb70d4a?w=400'],
+            ['Rambutan', 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400'],
+            ['Mangosteen', 'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=400'],
+            ['Passion Fruit', 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400'],
+            ['Lychee (Rose)', 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400'],
+            ['Jackfruit (Varikka)', 'https://images.unsplash.com/photo-1563114773-84221bd62daa?w=400'],
+            ['Sapodilla (Chikoo)', 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400'],
+            ['Star Fruit (Carambola)', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Mulberry', 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400'],
+            ['Potato (Kufri Jyoti)', 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400'],
+            ['Tomato (Hybrid)', 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'],
+            ['Onion (Nashik Red)', 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=400'],
+            ['Spinach (Palak)', 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400'],
+            ['Cauliflower (Pusa)', 'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=400'],
+            ['Bitter Gourd (Karela)', 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
+            ['Bottle Gourd (Lauki)', 'https://images.unsplash.com/photo-1587411768515-eeac0647deed?w=400'],
+            ['Ridge Gourd (Turai)', 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
+            ['Drumstick (Moringa)', 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400'],
+            ['Okra (Bhindi)', 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
+            ['Broccoli (Green)', 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400'],
+            ['Zucchini (Green)', 'https://images.unsplash.com/photo-1570586437263-ab629fccc818?w=400'],
+            ['Sweet Corn', 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400'],
+            ['Bell Pepper (Red)', 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400'],
+            ['Cherry Tomato', 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'],
+            ['Lettuce (Iceberg)', 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400'],
+            ['Mushroom (Button)', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'],
+            ['Cabbage (Green)', 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=400'],
+            ['Asparagus', 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400'],
+            ['Baby Corn', 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400'],
+            ['Celery', 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400'],
+            ['Red Cabbage', 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400'],
+            ['Zucchini (Yellow)', 'https://images.unsplash.com/photo-1607305387299-a3d9611cd469?w=400'],
+            ['Kale', 'https://images.unsplash.com/photo-1524179091875-bf99a9a6af57?w=400'],
+            ['Leeks', 'https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400'],
+            ['Turnip', 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
+            ['Almond (Mamra)', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Cashew (W240)', 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400'],
+            ['Pistachio (Iranian)', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Raisin (Kishmish)', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Walnut (Akhrot)', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Figs (Anjeer)', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Makhana (Fox Nut)', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Dried Cranberries', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Flax Seeds (Alsi)', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Chia Seeds', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Dates (Medjool)', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Hazelnut', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Brazil Nut', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Macadamia', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Pecan', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Pine Nuts (Chilgoza)', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Dried Apricots', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Dried Mango', 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'],
+            ['Sunflower Seeds', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
+            ['Pumpkin Seeds', 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400']
+        ];
+        let updated = 0;
+        for (const [name, url] of imageUpdates) {
+            try {
+                const r = await pool.query('UPDATE products SET image_url = $1 WHERE name = $2', [url, name]);
+                if (r.rowCount > 0) updated++;
+            } catch (e) { /* skip */ }
+        }
+        console.log(`Updated ${updated} product image URLs`);
     } catch (error) {
         console.error('Product seeding error:', error.message);
     }
