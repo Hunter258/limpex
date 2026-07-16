@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
@@ -25,6 +26,7 @@ const PRODUCTS_PER_PAGE = 12;
 const Products = () => {
     const { t } = useLanguage();
     const { addItem, getItemCount } = useCart();
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -523,6 +525,7 @@ const Products = () => {
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             addItem(product, 1);
+                                            navigate('/cart');
                                         }}
                                         style={{
                                             width: '100%',

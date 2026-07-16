@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import axios from 'axios';
@@ -7,6 +7,7 @@ import axios from 'axios';
 const LandingPage = () => {
     const { language, changeLanguage, t } = useLanguage();
     const { addItem, getItemCount, setIsCartOpen } = useCart();
+    const navigate = useNavigate();
     const [currentTagline, setCurrentTagline] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeCategory, setActiveCategory] = useState('all');
@@ -809,6 +810,7 @@ const LandingPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 addItem(product, 1);
+                                                navigate('/cart');
                                             }}
                                             style={{
                                                 width: '100%',
