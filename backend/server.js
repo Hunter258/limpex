@@ -9,8 +9,12 @@ const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 const pool = require('./config/database');
+const { getPoolStats } = require('./config/database');
+const { initSentry, captureException, sentryRequestHandler, sentryTracingHandler, sentryErrorHandler } = require('./config/sentry');
+const logger = require('./config/logger');
 const { createRazorpayOrder, verifyRazorpayPayment } = require('./services/payment');
 const { sendOrderConfirmation, sendOrderStatusUpdate } = require('./services/email');
+const { runMigrations } = require('../database/migrations/run');
 
 dotenv.config();
 
@@ -20,13 +24,31 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET;
 
 if (!JWT_SECRET) {
-    console.error('FATAL: JWT_SECRET environment variable is required');
+    logger.error('FATAL: JWT_SECRET environment variable is required');
     process.exit(1);
 }
 
+const sentryEnabled = initSentry(app);
+if (sentryEnabled) {
+    app.use(sentryRequestHandler());
+    app.use(sentryTracingHandler());
+}
+
 app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
+            imgSrc: ["'self'", "data:", "https:", "blob:"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://checkout.razorpay.com"],
+            frameSrc: ["'self'", "https://api.razorpay.com"],
+            connectSrc: ["'self'", "https://api.razorpay.com"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 app.use(compression());
 
@@ -44,27 +66,39 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400,
 }));
 
 const generalLimiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-    message: { error: 'Too many requests, please try again later.' }
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
-    message: { error: 'Too many login attempts, please try again after 15 minutes.' }
+    message: { error: 'Too many login attempts, please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const orderLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 20,
+    message: { error: 'Too many order attempts. Please wait before placing another order.' },
 });
 
 app.use('/api/', generalLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+app.use('/api/orders', orderLimiter);
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 const authenticate = async (req, res, next) => {
     try {
@@ -121,17 +155,10 @@ const validatePhone = (phone) => {
 
 const initDatabase = async () => {
     try {
-        console.log('Initializing database...');
-        const schemaPath = path.join(__dirname, '../database/migrations/001_initial_schema.sql');
-        if (fs.existsSync(schemaPath)) {
-            try {
-                const schema = fs.readFileSync(schemaPath, 'utf8');
-                await pool.query(schema);
-                console.log('Main schema created');
-            } catch (e) {
-                console.log('Schema migration note:', e.message);
-            }
-        }
+        logger.info('Initializing database...');
+
+        await runMigrations();
+        logger.info('Migrations complete');
 
         const salt = await bcrypt.genSalt(12);
         const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Admin@123', salt);
@@ -140,47 +167,14 @@ const initDatabase = async () => {
              VALUES ($1, $2, $3, $4, 1) ON CONFLICT (email) DO NOTHING`,
             [process.env.ADMIN_EMAIL || 'admin@limpex.com', passwordHash, 'Admin', 'User']
         );
-        console.log('Default admin user ready');
+        logger.info('Default admin user ready');
 
         await seedCategoriesAndProducts();
-        await createAdditionalTables();
-        console.log('Database initialization complete');
+        await fixProductImages();
+        logger.info('Database initialization complete');
     } catch (error) {
-        console.error('Database init error:', error.message);
-    }
-};
-
-const createAdditionalTables = async () => {
-    try {
-        await pool.query(`CREATE TABLE IF NOT EXISTS orders (
-            id SERIAL PRIMARY KEY, user_id UUID REFERENCES users(id),
-            customer_name VARCHAR(255) NOT NULL, customer_email VARCHAR(255),
-            customer_phone VARCHAR(20), delivery_address TEXT NOT NULL,
-            total_amount DECIMAL(10,2) NOT NULL, status VARCHAR(50) DEFAULT 'pending',
-            payment_method VARCHAR(50) DEFAULT 'cod', payment_id VARCHAR(255),
-            delivery_estimate VARCHAR(100), notes TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
-
-        await pool.query(`CREATE TABLE IF NOT EXISTS order_items (
-            id SERIAL PRIMARY KEY, order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
-            product_id INTEGER REFERENCES products(id), product_name VARCHAR(255) NOT NULL,
-            quantity INTEGER NOT NULL CHECK (quantity > 0), price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
-            unit VARCHAR(20) DEFAULT 'kg'
-        )`);
-
-        await pool.query(`CREATE TABLE IF NOT EXISTS delivery_tracking (
-            id SERIAL PRIMARY KEY, order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
-            status VARCHAR(50) NOT NULL, location VARCHAR(255), notes TEXT,
-            estimated_delivery TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
-
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_estimate VARCHAR(100)`);
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(255)`);
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id UUID`);
-    } catch (e) {
-        console.log('Additional tables note:', e.message);
+        logger.error('Database init error', { error: error.message, stack: error.stack });
+        captureException(error, { phase: 'database_init' });
     }
 };
 
@@ -188,11 +182,11 @@ const seedCategoriesAndProducts = async () => {
     try {
         const check = await pool.query('SELECT COUNT(*) FROM products');
         if (parseInt(check.rows[0].count) > 0) {
-            console.log('Products already seeded, skipping');
+            logger.info('Products already seeded, skipping');
             return;
         }
     } catch (e) {
-        console.log('Products table empty or missing, seeding...');
+        logger.info('Products table empty or missing, seeding...');
     }
 
     try {
@@ -230,14 +224,7 @@ const seedCategoriesAndProducts = async () => {
         await pool.query(`CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()`);
 
-        await pool.query(`CREATE OR REPLACE FUNCTION update_orders_updated_at()
-        RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP; RETURN NEW; END; $$ language 'plpgsql'`);
-
-        await pool.query(`DROP TRIGGER IF EXISTS update_orders_updated_at ON orders`);
-        await pool.query(`CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
-            FOR EACH ROW EXECUTE FUNCTION update_orders_updated_at()`);
-
-        console.log('Tables created, seeding categories...');
+        logger.info('Tables created, seeding categories...');
 
         const cats = [
             ['Indian Fruits', 'indian', 'fruits', 'Fresh fruits from India'],
@@ -253,7 +240,7 @@ const seedCategoriesAndProducts = async () => {
         for (const c of cats) {
             await pool.query('INSERT INTO categories (name, type, parent_category, description) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING', c);
         }
-        console.log('8 categories seeded');
+        logger.info('8 categories seeded');
 
         const catMap = {};
         const catRows = await pool.query('SELECT id, name FROM categories');
@@ -295,7 +282,7 @@ const seedCategoriesAndProducts = async () => {
             [catMap['Indian Vegetables'], 'Tomato (Hybrid)', 'Fresh hybrid tomatoes', 45, 'kg', 1000, 'India', true, 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'],
             [catMap['Indian Vegetables'], 'Onion (Nashik Red)', 'Premium Nashik red onions', 30, 'kg', 1500, 'India', false, 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=400'],
             [catMap['Indian Vegetables'], 'Spinach (Palak)', 'Fresh spinach rich in iron', 25, 'bunch', 500, 'India', true, 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400'],
-            [catMap['Indian Vegetables'], 'Cauliflower (Pusa)', 'Fresh Pusa variety cauliflower', 60, 'kg', 400, 'India', false, 'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?w=400'],
+            [catMap['Indian Vegetables'], 'Cauliflower (Pusa)', 'Fresh Pusa variety cauliflower', 60, 'kg', 400, 'India', false, 'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=400'],
             [catMap['Indian Vegetables'], 'Bitter Gourd (Karela)', 'Organic bitter gourd', 80, 'kg', 300, 'India', true, 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
             [catMap['Indian Vegetables'], 'Bottle Gourd (Lauki)', 'Fresh bottle gourd', 40, 'kg', 400, 'India', false, 'https://images.unsplash.com/photo-1587411768515-eeac0647deed?w=400'],
             [catMap['Indian Vegetables'], 'Ridge Gourd (Turai)', 'Tender ridge gourd', 50, 'kg', 350, 'India', true, 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
@@ -311,13 +298,13 @@ const seedCategoriesAndProducts = async () => {
             [catMap['International Vegetables'], 'Mushroom (Button)', 'Fresh white button mushrooms', 150, 'kg', 200, 'India', false, 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'],
             [catMap['International Vegetables'], 'Cabbage (Green)', 'Fresh green cabbage', 35, 'kg', 600, 'India', false, 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=400'],
 
-            [catMap['Exotic Vegetables'], 'Asparagus', 'Tender asparagus spears', 200, 'bunch', 100, 'India', true, 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400'],
+            [catMap['Exotic Vegetables'], 'Asparagus', 'Tender asparagus spears', 200, 'bunch', 100, 'India', true, 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400'],
             [catMap['Exotic Vegetables'], 'Baby Corn', 'Crisp baby corn', 120, 'kg', 200, 'India', true, 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400'],
             [catMap['Exotic Vegetables'], 'Celery', 'Fresh celery bunches', 60, 'bunch', 150, 'India', true, 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400'],
-            [catMap['Exotic Vegetables'], 'Red Cabbage', 'Vibrant red cabbage', 80, 'kg', 200, 'India', true, 'https://images.unsplash.com/photo-1570586437263-ab629fccc818?w=400'],
-            [catMap['Exotic Vegetables'], 'Zucchini (Yellow)', 'Bright yellow zucchini', 120, 'kg', 150, 'India', true, 'https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=400'],
+            [catMap['Exotic Vegetables'], 'Red Cabbage', 'Vibrant red cabbage', 80, 'kg', 200, 'India', true, 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400'],
+            [catMap['Exotic Vegetables'], 'Zucchini (Yellow)', 'Bright yellow zucchini', 120, 'kg', 150, 'India', true, 'https://images.unsplash.com/photo-1607305387299-a3d9611cd469?w=400'],
             [catMap['Exotic Vegetables'], 'Kale', 'Nutrient-dense curly kale', 100, 'bunch', 100, 'India', true, 'https://images.unsplash.com/photo-1524179091875-bf99a9a6af57?w=400'],
-            [catMap['Exotic Vegetables'], 'Leeks', 'Fresh leeks for soups and stews', 150, 'bunch', 80, 'India', true, 'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400'],
+            [catMap['Exotic Vegetables'], 'Leeks', 'Fresh leeks for soups and stews', 150, 'bunch', 80, 'India', true, 'https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400'],
             [catMap['Exotic Vegetables'], 'Turnip', 'Fresh organic turnips', 50, 'kg', 200, 'India', true, 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400'],
 
             [catMap['Indian Dry Fruits'], 'Almond (Mamra)', 'Premium Mamra almonds from Kashmir', 1200, 'kg', 300, 'Kashmir', true, 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=400'],
@@ -352,12 +339,17 @@ const seedCategoriesAndProducts = async () => {
                 );
                 seeded++;
             } catch (e) {
-                console.error('Seed product failed:', p[1], e.message);
+                logger.error('Seed product failed', { product: p[1], error: e.message });
             }
         }
-        console.log(`Seeded ${seeded} of ${products.length} products`);
+        logger.info(`Seeded ${seeded} of ${products.length} products`);
+    } catch (error) {
+        logger.error('Product seeding error', { error: error.message });
+    }
+};
 
-        console.log('Updating product image URLs...');
+const fixProductImages = async () => {
+    try {
         const imageUpdates = [
             ['Alphonso Mango (Hapus)', 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400'],
             ['Banana (Robusta)', 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400'],
@@ -437,13 +429,13 @@ const seedCategoriesAndProducts = async () => {
         let updated = 0;
         for (const [name, url] of imageUpdates) {
             try {
-                const r = await pool.query('UPDATE products SET image_url = $1 WHERE name = $2', [url, name]);
+                const r = await pool.query('UPDATE products SET image_url = $1 WHERE name = $2 AND image_url IS DISTINCT FROM $1', [url, name]);
                 if (r.rowCount > 0) updated++;
             } catch (e) { /* skip */ }
         }
-        console.log(`Updated ${updated} product image URLs`);
-    } catch (error) {
-        console.error('Product seeding error:', error.message);
+        if (updated > 0) logger.info(`Updated ${updated} product image URLs`);
+    } catch (e) {
+        logger.warn('Image fix failed', { error: e.message });
     }
 };
 
@@ -452,22 +444,54 @@ app.use((req, res, next) => {
     res.on('finish', () => {
         const duration = Date.now() - start;
         if (req.originalUrl !== '/api/health') {
-            console.log(JSON.stringify({
+            logger.info('request', {
                 method: req.method,
                 url: req.originalUrl,
                 status: res.statusCode,
-                duration: `${duration}ms`
-            }));
+                duration: `${duration}ms`,
+                ip: req.ip,
+            });
         }
     });
     next();
 });
 
-app.get('/api/health', (req, res) => {
-    res.json({
+app.get('/api/health', async (req, res) => {
+    const health = {
         status: 'ok',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+        uptime: Math.floor(process.uptime()),
+        environment: process.env.NODE_ENV || 'development',
+        version: process.env.APP_VERSION || '1.0.0',
+        services: {
+            database: 'unknown',
+            razorpay: !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET),
+            email: !!(process.env.SMTP_HOST && process.env.SMTP_USER),
+            sentry: sentryEnabled,
+        },
+    };
+
+    try {
+        const dbStart = Date.now();
+        await pool.query('SELECT 1');
+        health.services.database = 'connected';
+        health.services.dbLatency = `${Date.now() - dbStart}ms`;
+        health.services.dbPool = getPoolStats();
+    } catch (err) {
+        health.status = 'degraded';
+        health.services.database = 'disconnected';
+        logger.error('Health check: database unreachable', { error: err.message });
+    }
+
+    res.status(health.status === 'ok' ? 200 : 503).json(health);
+});
+
+app.get('/api/metrics', authenticate, authorize('super_admin', 'admin'), (req, res) => {
+    res.json({
+        uptime: Math.floor(process.uptime()),
+        memory: process.memoryUsage(),
+        dbPool: getPoolStats(),
+        timestamp: new Date().toISOString(),
     });
 });
 
@@ -502,6 +526,8 @@ app.post('/api/auth/login', async (req, res, next) => {
 
         const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '24h' });
         const refreshToken = jwt.sign({ userId: user.id, type: 'refresh' }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+        logger.info('User logged in', { userId: user.id, email: user.email });
 
         res.json({
             message: 'Login successful',
@@ -551,6 +577,8 @@ app.post('/api/auth/register', async (req, res, next) => {
         const user = result.rows[0];
         const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '24h' });
         const refreshToken = jwt.sign({ userId: user.id, type: 'refresh' }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+        logger.info('User registered', { userId: user.id, email: user.email });
 
         res.status(201).json({
             message: 'Registration successful',
@@ -795,11 +823,14 @@ app.post('/api/orders', async (req, res, next) => {
 
         await client.query('COMMIT');
 
-        sendOrderConfirmation(order, validatedItems).catch(e => console.error('Order email failed:', e.message));
+        logger.info('Order created', { orderId: order.id, total: totalAmount, paymentMethod: paymentMethod || 'cod', itemCount: validatedItems.length });
+
+        sendOrderConfirmation(order, validatedItems).catch(e => logger.error('Order email failed', { error: e.message }));
 
         res.status(201).json({ message: 'Order placed successfully', order: { ...order, totalAmount } });
     } catch (error) {
         await client.query('ROLLBACK');
+        captureException(error, { phase: 'order_creation' });
         next(error);
     } finally {
         client.release();
@@ -891,9 +922,11 @@ app.put('/api/orders/:id/status', authenticate, authorize('super_admin', 'admin'
             [orderId, status, sanitizeString(location) || null, sanitizeString(notes) || null]
         );
 
+        logger.info('Order status updated', { orderId, newStatus: status });
+
         const orderResult = await pool.query('SELECT customer_name, customer_email, total_amount FROM orders WHERE id = $1', [orderId]);
         if (orderResult.rows.length > 0 && orderResult.rows[0].customer_email) {
-            sendOrderStatusUpdate({ ...orderResult.rows[0], id: orderId }, status).catch(e => console.error('Status email failed:', e.message));
+            sendOrderStatusUpdate({ ...orderResult.rows[0], id: orderId }, status).catch(e => logger.error('Status email failed', { error: e.message }));
         }
 
         res.json({ message: 'Order status updated' });
@@ -916,6 +949,7 @@ app.delete('/api/orders/:id', authenticate, authorize('super_admin'), async (req
         }
 
         await pool.query('DELETE FROM orders WHERE id = $1', [orderId]);
+        logger.info('Order deleted', { orderId });
         res.json({ message: 'Order deleted' });
     } catch (error) {
         next(error);
@@ -973,6 +1007,7 @@ app.post('/api/contact', async (req, res, next) => {
         if (message.length > 2000) {
             return res.status(400).json({ error: 'Message must be under 2000 characters' });
         }
+        logger.info('Contact form submission', { name, email, subject });
         res.json({ message: 'Thank you for your message. We will get back to you within 24 hours.' });
     } catch (error) {
         next(error);
@@ -981,16 +1016,28 @@ app.post('/api/contact', async (req, res, next) => {
 
 app.use(express.static(path.join(__dirname, '../frontend/build'), {
     maxAge: '1d',
-    etag: true
+    etag: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        } else if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    }
 }));
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
+if (sentryEnabled) {
+    app.use(sentryErrorHandler());
+}
+
 app.use((err, req, res, next) => {
     const message = err?.message || err?.toString() || 'Unknown error';
-    console.error('Unhandled error:', message, err?.stack || '');
+    logger.error('Unhandled error', { error: message, stack: err?.stack, url: req.originalUrl, method: req.method });
+    captureException(err, { url: req.originalUrl, method: req.method });
     if (message === 'Not allowed by CORS') {
         return res.status(403).json({ error: 'Origin not allowed by CORS' });
     }
@@ -1002,20 +1049,20 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`, { env: process.env.NODE_ENV || 'development', pid: process.pid });
     initDatabase();
 });
 
 const gracefulShutdown = (signal) => {
-    console.log(`${signal} received, shutting down gracefully`);
+    logger.info(`${signal} received, shutting down gracefully`);
     server.close(() => {
         pool.end().then(() => {
-            console.log('Database pool closed');
+            logger.info('Database pool closed');
             process.exit(0);
         });
     });
     setTimeout(() => {
-        console.error('Forced shutdown after timeout');
+        logger.error('Forced shutdown after timeout');
         process.exit(1);
     }, 10000);
 };
@@ -1023,9 +1070,11 @@ const gracefulShutdown = (signal) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled Rejection:', reason);
+    logger.error('Unhandled Rejection', { reason: reason?.toString() || 'unknown', stack: reason?.stack });
+    captureException(reason);
 });
 process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
+    logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+    captureException(error);
     gracefulShutdown('uncaughtException');
 });
