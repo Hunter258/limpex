@@ -11,9 +11,9 @@ const getProductImage = (name, category) => {
     if (lower.includes('orange')) return 'https://images.unsplash.com/photo-1547514701-42782101795e?w=300';
     if (lower.includes('mango')) return 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=300';
     if (lower.includes('grape')) return 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=300';
-    if (lower.includes('tomato')) return 'https://images.unsplash.com/photo-1546470427-0d4db154ceb8?w=300';
-    if (lower.includes('potato')) return 'https://images.unsplash.com/photo-1518977676601-b53f82ber0a?w=300';
-    if (lower.includes('onion')) return 'https://images.unsplash.com/photo-1618512496248-a07fe8398f9d?w=300';
+    if (lower.includes('tomato')) return 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300';
+    if (lower.includes('potato')) return 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=300';
+    if (lower.includes('onion')) return 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=300';
     if (category === 'fruits') return 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=300';
     if (category === 'vegetables') return 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300';
     if (category === 'dry_fruits') return 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=300';

@@ -66,7 +66,7 @@ const LandingPage = () => {
     const categoryImages = {
         indian: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
         international: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=400',
-        exotic: 'https://images.unsplash.com/photo-1527325687032-427c14f7d1c0?w=400',
+        exotic: 'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=400',
         fruits: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=400',
         vegetables: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400',
         dry_fruits: 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=400'
@@ -607,7 +607,8 @@ const LandingPage = () => {
             {/* Shop by Category */}
             <section id="shop" style={{
                 padding: '80px 5%',
-                background: '#f8fafb'
+                background: '#f8fafb',
+                scrollMarginTop: '70px'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
                     <p style={{ color: '#00b4a0', fontSize: '12px', fontWeight: '700', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>
@@ -628,10 +629,10 @@ const LandingPage = () => {
                         {[
                             { name: 'Indian Fruits', filter: 'Indian Fruits', sub: 'Fresh & Seasonal', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=350', color: '#ff6b6b', count: products.filter(p => p.category_name === 'Indian Fruits').length || '10+' },
                             { name: 'International Fruits', filter: 'International Fruits', sub: 'Imported Goodness', img: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=350', color: '#4ecdc4', count: products.filter(p => p.category_name === 'International Fruits').length || '10+' },
-                            { name: 'Exotic Fruits', filter: 'Exotic Fruits', sub: 'Premium Collection', img: 'https://images.unsplash.com/photo-1527325687032-427c14f7d1c0?w=350', color: '#9b59b6', count: products.filter(p => p.category_name === 'Exotic Fruits').length || '8+' },
+                            { name: 'Exotic Fruits', filter: 'Exotic Fruits', sub: 'Premium Collection', img: 'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=350', color: '#9b59b6', count: products.filter(p => p.category_name === 'Exotic Fruits').length || '8+' },
                             { name: 'Indian Vegetables', filter: 'Indian Vegetables', sub: 'Garden Fresh', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=350', color: '#2ecc71', count: products.filter(p => p.category_name === 'Indian Vegetables').length || '10+' },
                             { name: 'International Vegetables', filter: 'International Vegetables', sub: 'Global Selection', img: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=350', color: '#3498db', count: products.filter(p => p.category_name === 'International Vegetables').length || '8+' },
-                            { name: 'Exotic Vegetables', filter: 'Exotic Vegetables', sub: 'Specialty Items', img: 'https://images.unsplash.com/photo-1515471209610-dae159334820?w=350', color: '#e74c3c', count: products.filter(p => p.category_name === 'Exotic Vegetables').length || '8+' },
+                            { name: 'Exotic Vegetables', filter: 'Exotic Vegetables', sub: 'Specialty Items', img: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=350', color: '#e74c3c', count: products.filter(p => p.category_name === 'Exotic Vegetables').length || '8+' },
                             { name: 'Indian Dry Fruits', filter: 'Indian Dry Fruits', sub: 'Premium Quality', img: 'https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=350', color: '#f39c12', count: products.filter(p => p.category_name === 'Indian Dry Fruits').length || '10+' },
                             { name: 'All Products', filter: 'all', sub: 'View Complete Range', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=350', color: '#00b4a0', count: products.length || '76' }
                         ].map((cat, index) => (
@@ -648,7 +649,9 @@ const LandingPage = () => {
                                 }}
                                 onClick={() => {
                                     setActiveCategory(cat.filter);
-                                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                                    setTimeout(() => {
+                                        document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }, 150);
                                 }}
                             >
                                 <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
@@ -686,7 +689,8 @@ const LandingPage = () => {
             {/* Products Section */}
             <section id="products" style={{
                 padding: '80px 5%',
-                background: '#fff'
+                background: '#fff',
+                scrollMarginTop: '70px'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
                     <p style={{ color: '#00b4a0', fontSize: '12px', fontWeight: '700', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>
@@ -864,7 +868,8 @@ const LandingPage = () => {
             {/* About Section */}
             <section id="about" className="scroll-reveal" style={{
                 padding: '80px 5%',
-                background: '#f8fafb'
+                background: '#f8fafb',
+                scrollMarginTop: '70px'
             }}>
                 <div style={{
                     maxWidth: '1200px',
@@ -928,7 +933,8 @@ const LandingPage = () => {
             {/* Services Section */}
             <section id="services" className="scroll-reveal" style={{
                 padding: '80px 5%',
-                background: '#fff'
+                background: '#fff',
+                scrollMarginTop: '70px'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
                     <p style={{ color: '#00b4a0', fontSize: '12px', fontWeight: '700', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>
@@ -1168,7 +1174,8 @@ const LandingPage = () => {
             {/* Contact Section */}
             <section id="contact" className="scroll-reveal" style={{
                 padding: '80px 5%',
-                background: '#fff'
+                background: '#fff',
+                scrollMarginTop: '70px'
             }}>
                 <div className="contact-grid" style={{
                     maxWidth: '1200px',
