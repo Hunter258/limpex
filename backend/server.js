@@ -32,11 +32,11 @@ app.use(compression());
 
 const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : ['http://localhost:3000'];
+    : ['http://localhost:3000', 'https://limpex-production.up.railway.app'];
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*') || origin.includes('.up.railway.app')) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
